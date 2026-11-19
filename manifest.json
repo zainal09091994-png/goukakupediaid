@@ -1,0 +1,40 @@
+{
+  "name": "Goukaku Pedia ID — Teman Belajar Kamu",
+  "short_name": "Goukaku",
+  "description": "Belajar persiapan ujian 介護福祉士 dengan furigana, terjemahan Indonesia & TRIK JITU.",
+  "start_url": "./index.html#m/beranda",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F4FAFE",
+  "theme_color": "#041CA2",
+  "lang": "id",
+  "icons": [
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "./icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Soal",
+      "url": "./index.html#m/soal"
+    },
+    {
+      "name": "Kosakata",
+      "url": "./index.html#m/belajar"
+    }
+  ]
+}
