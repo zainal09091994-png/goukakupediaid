@@ -76,7 +76,7 @@ const stamp = (cls = '') => `<div class="stamp ${cls}" aria-label="合格"><b>�
 function logoMark(size = 40) {
   const s = S.pub && S.pub.brand && S.pub.brand.logo;
   if (s) return `<img class="mark" src="${esc(s)}" alt="Logo" width="${size}" height="${size}" style="width:${size}px;height:${size}px">`;
-  return `<svg class="mark" style="width:${size}px;height:${size}px" viewBox="0 0 100 100" aria-hidden="true"><defs><radialGradient id="lg${size}" cx="50%" cy="40%" r="60%"><stop offset="0" stop-color="#0351E2"/><stop offset=".6" stop-color="#041CA2"/><stop offset="1" stop-color="#010A87"/></radialGradient></defs><circle cx="50" cy="50" r="48" fill="#74D1FA"/><circle cx="50" cy="50" r="43" fill="url(#lg${size})"/><path d="M28 70c8-5 15-5 22 0 7-5 14-5 22 0" stroke="#BFE6F6" stroke-width="3" fill="none"/><text x="50" y="58" text-anchor="middle" font-size="30" font-weight="700" fill="#fff" font-family="'Noto Sans JP',sans-serif">合格</text></svg>`;
+  return `<img class="mark" src="./logo.png" alt="Logo Goukaku Pedia ID" width="${size}" height="${size}" style="width:${size}px;height:${size}px">`;
 }
 const logo = (sub = true) => `<div class="logo">${logoMark()}<div>GOUKAKU${sub ? '<small>Teman Belajar Kamu</small>' : ''}</div></div>`;
 const WA_SVG = '<svg viewBox="0 0 32 32" fill="currentColor" aria-hidden="true"><path d="M16 3a13 13 0 0 0-11.2 19.6L3 29l6.6-1.7A13 13 0 1 0 16 3zm0 23.7c-2.1 0-4.1-.6-5.9-1.6l-.4-.3-3.9 1 1-3.8-.3-.4A10.7 10.7 0 1 1 16 26.7zm5.9-8c-.3-.2-1.9-.9-2.2-1s-.5-.2-.7.2-.8 1-1 1.2-.4.2-.7.1a8.8 8.8 0 0 1-4.4-3.8c-.3-.6.3-.5 1-1.7.1-.2 0-.4 0-.6l-1-2.4c-.3-.6-.5-.5-.7-.5h-.6c-.2 0-.6.1-.9.4s-1.1 1.1-1.1 2.7 1.2 3.1 1.3 3.3c.2.2 2.3 3.5 5.5 4.9 2 .9 2.8.9 3.8.8.6-.1 1.9-.8 2.2-1.5s.3-1.3.2-1.5c-.1-.1-.3-.2-.6-.4z"/></svg>';
@@ -451,7 +451,7 @@ R.home = () => {
       <span class="chip" style="background:rgba(255,255,255,.15);color:#BEE9FF">${ic('verified')} Program Persiapan Kaigo Fukushishi</span>
       <h1 class="mt3">${furi(h.judul)}</h1><p class="sub">${furi(h.subjudul || '')}</p>
       <div class="row wrap mt4"><button class="btn btn-white" data-act="cta" data-link="${esc(h.cta_link || '#coba')}">${esc(h.cta_teks || 'Coba Gratis')} ${ic('arrow_forward')}</button>
-      <button class="btn btn-ghost" style="color:#fff;box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.5)" data-act="ke" data-to="paket">Lihat Paket</button></div>
+      ${/paket/i.test(h.cta_link || '') ? `<button class="btn btn-ghost" style="color:#fff;box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.5)" data-act="ke" data-to="coba">Coba Gratis</button>` : `<button class="btn btn-ghost" style="color:#fff;box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.5)" data-act="ke" data-to="paket">Lihat Paket</button>`}</div>
       ${h.gambar_url ? `<img class="slide-img mt4" src="${esc(h.gambar_url)}" alt="${esc(h.judul)}" loading="${i ? 'lazy' : 'eager'}">` : ''}</div>`).join('');
   const art = `<div class="hero-art" aria-hidden="true"><div class="book">
       <div class="row-b"><span class="chip" style="background:rgba(255,255,255,.18);color:#fff">科目: 介護の基本</span><span class="tiny" style="opacity:.8">Soal #05</span></div>
