@@ -1436,7 +1436,7 @@ const MODS = {
     f: [F('nama', 'Nama', 'furi', { req: 1 }), F('jenis', 'Jenis', 'sel', { opt: [['過去問', '過去問'], ['練習', '練習'], ['模擬試験', '模擬試験']] }), F('ujian_ke', 'Ujian ke- (過去問)', 'num'), F('deskripsi', 'Deskripsi', 'textarea'), F('jumlah_soal', 'Jumlah soal', 'num'),
       F('mode', 'Mode', 'sel', { opt: [['latihan', 'Latihan'], ['ujian_bertimer', 'Ujian bertimer']] }), F('durasi_menit', 'Durasi (menit)', 'num'), F('paket_akses', 'Akses paket', 'akses'), F('buka', 'Buka (opsional)', 'dt'), F('tutup', 'Tutup (opsional)', 'dt'),
       F('tampilkan_pembahasan', 'Tampilkan pembahasan', 'sel', { opt: [['langsung', 'Langsung'], ['setelah_selesai', 'Setelah selesai'], ['setelah_tutup', 'Setelah ditutup']] }), F('urutan', 'Urutan', 'num'), F('status', 'Status', 'sel', { opt: STATUS })] },
-  banksoal: { sheet: 'BankSoal', judul: 'Bank Soal', ico: 'library_books', imp: 1, filter: 'paket_soal_id', cols: [['nomor', 'No'], ['sesi', 'Sesi'], ['kamoku', '科目'], ['soal_jp', 'Soal', v => esc(plainJP(v).slice(0, 60)) + '…'], ['kunci', 'Kunci'], ['gratis', 'Gratis']],
+  banksoal: { sheet: 'BankSoal', judul: 'Bank Soal', ico: 'library_books', imp: 1, filter: 'paket_soal_id', tools: [['tplBank', 'description', 'Template CSV']], cols: [['nomor', 'No'], ['sesi', 'Sesi'], ['kamoku', '科目'], ['soal_jp', 'Soal', v => esc(plainJP(v).slice(0, 60)) + '…'], ['kunci', 'Kunci'], ['gratis', 'Gratis']],
     f: [F('paket_soal_id', 'Paket soal', 'paketSoal', { req: 1 }), F('sesi', 'Sesi', 'sel', { opt: [['午前', '午前'], ['午後', '午後']] }), F('bagian', 'Bagian', 'sel', { opt: [['A', 'A'], ['B', 'B'], ['C', 'C']] }), F('nomor', 'Nomor', 'num', { req: 1 }), F('kamoku', '科目', 'kamoku', { req: 1 }),
       F('soal_jp', 'Soal JP (｜漢字《かんじ》)', 'furi', { req: 1, full: 1 }), F('soal_id', 'Terjemahan soal', 'textarea'), F('gambar_url', 'Gambar soal', 'img', { folder: 'soal' }),
       ...[1, 2, 3, 4, 5].map(i => [F('pilihan_' + i, 'Pilihan ' + i + ' (JP)', 'furi', { rows: 2 }), F('pilihan_' + i + '_id', 'Pilihan ' + i + ' (ID)')]).flat(),
@@ -1524,7 +1524,7 @@ function crudView(key) {
   let list = rows.filter(r => (!q || JSON.stringify(r).toLowerCase().indexOf(q) > -1) && (!fv || String(r[M.filter]) === fv));
   if (M.urut) list = list.slice().sort((a, b) => num(a.urutan || a.langkah_ke) - num(b.urutan || b.langkah_ke));
   if (M.sheet === 'Leads' || M.sheet === 'Kampanye') list = list.slice().reverse();
-  const fopts = M.filter ? [...new Set(rows.map(r => r[M.filter]).filter(Boolean))] : [];
+  const fopts = M.filter ? [...new Set([...(M.filter === 'paket_soal_id' && S.adm ? S.adm.paket_soal.map(p => p.id) : []), ...rows.map(r => r[M.filter]).filter(Boolean)])] : [];
   const fLabel = v => M.filter === 'paket_soal_id' ? ((S.adm && S.adm.paket_soal.find(p => p.id === v)) || { nama: v }).nama : v;
   return `<div class="row-b wrap gap2"><div class="row wrap gap2 f1"><div class="search" style="min-width:220px;flex:1;max-width:360px">${ic('search')}<input class="inp" id="qAd" data-k="${key}" placeholder="Cari…" value="${esc(S.ui['q_' + key] || '')}"></div>
       ${M.filter ? `<select class="inp" style="max-width:260px;border-radius:999px" id="fAd" data-k="${key}"><option value="">Semua ${esc(M.filter === 'paket_soal_id' ? 'paket' : M.filter)}</option>${fopts.map(v => `<option value="${esc(v)}" ${v === fv ? 'selected' : ''}>${furi(fLabel(v))}</option>`).join('')}</select>` : ''}</div>
@@ -1659,10 +1659,53 @@ ACT.geserAd = el => {
   [rows[i], rows[j]] = [rows[j], rows[i]]; rows.forEach((r, k) => r.urutan = k + 1); S.ad[M.sheet] = rows; render(false);
   API.call('a.urut', { sheet: M.sheet, ids: rows.map(r => r.id) }, { silent: true }).then(() => simpanAd(M.sheet)).catch(e => toast(e.message, 'err'));
 };
+function pilihPaketSoal(daftar, kosong, total, awal) {
+  return new Promise(res => {
+    modal(`<p class="small">${kosong} dari ${total} soal di CSV belum punya <b>paket soal</b>. Masukkan ke paket:</p>
+      <select class="inp mt3" id="pkImp">${daftar.map(p => `<option value="${esc(p.id)}" ${p.id === awal ? 'selected' : ''}>${esc(plainJP(p.nama))}${p.jenis ? ' · ' + esc(p.jenis) : ''}</option>`).join('')}</select>
+      <div class="row mt5" style="justify-content:flex-end"><button class="btn btn-light" id="pkN">Batal</button><button class="btn btn-primary" id="pkY">Lanjut</button></div>`, { title: 'Pilih paket soal' });
+    $('#pkN').onclick = () => { closeModal(); res(null); };
+    $('#pkY').onclick = () => { const v = $('#pkImp').value; closeModal(); res(v); };
+  });
+}
+/* Template CSV Bank Soal: kolom lengkap + 1 contoh (furigana, analisa ○×, TRIK JITU, kosakata) */
+ACT.tplBank = () => {
+  const contoh = {
+    paket_soal_id: '', sesi: '午前', bagian: 'A', nomor: '1', kamoku: '介護の基本',
+    soal_jp: '｜介護福祉士《かいごふくしし》の｜役割《やくわり》として、｜最《もっと》も｜適切《てきせつ》なものを１つ｜選《えら》びなさい。',
+    soal_id: 'Pilih 1 yang paling tepat sebagai peran pekerja perawatan bersertifikat.', gambar_url: '',
+    pilihan_1: '｜利用者《りようしゃ》の｜意向《いこう》を｜確認《かくにん》せずに｜介護《かいご》する。', pilihan_2: '｜利用者《りようしゃ》の｜自立《じりつ》を｜支援《しえん》する。',
+    pilihan_3: 'すべて｜家族《かぞく》に｜任《まか》せる。', pilihan_4: '｜医療《いりょう》｜行為《こうい》を｜自由《じゆう》に｜行《おこな》う。', pilihan_5: '',
+    pilihan_1_id: 'Merawat tanpa menanyakan keinginan pengguna.', pilihan_2_id: 'Mendukung kemandirian pengguna.',
+    pilihan_3_id: 'Menyerahkan semuanya kepada keluarga.', pilihan_4_id: 'Melakukan tindakan medis dengan bebas.', pilihan_5_id: '',
+    kunci: '2',
+    analisa: ['1|×|意向を確認しないのは不適切。|Salah: keinginan pengguna harus ditanyakan.', '2|○|自立支援は介護の基本。|Benar: mendukung kemandirian adalah dasar perawatan.',
+      '3|×|家族任せは不適切。|Salah: tidak boleh diserahkan semua ke keluarga.', '4|×|医療行為には制限がある。|Salah: tindakan medis dibatasi.'].join('\n'),
+    trik_kata_kunci: '自立支援 = jawaban aman', trik_rumus_cepat: 'Pilihan yang menghormati keinginan & kemandirian pengguna hampir selalu BENAR.',
+    trik_jembatan_ingatan: 'JIRITSU = mandiri, biarkan pengguna melakukan sendiri yang ia bisa.', trik_awas_jebakan: 'Kata すべて / 必ず biasanya SALAH.',
+    kosakata: '自立支援（じりつしえん）=dukungan kemandirian; 意向（いこう）=keinginan', gratis: 'tidak', status: 'aktif'
+  };
+  const kolom = (S.adm && S.adm.schema && S.adm.schema.BankSoal || Object.keys(contoh)).filter(k => k !== 'id');
+  const baris = {}; kolom.forEach(k => { baris[k] = contoh[k] === undefined ? '' : contoh[k]; });
+  unduhCSV('template-bank-soal', [baris]);
+  toast('Template diunduh. Buka di Excel / Google Sheets, ganti contoh dengan soal Anda.', 'ok', 5000);
+};
 async function importCSV(inp) {
   const M = MODS[inp.dataset.imp], file = inp.files[0]; if (!file) return;
   const rows = parseCSV(await file.text()); inp.value = '';
   if (!rows.length) return toast('CSV kosong', 'warn');
+  if (M.sheet === 'BankSoal') {
+    const daftar = (S.adm && S.adm.paket_soal) || [];
+    if (!daftar.length) return toast('Buat dulu Paket Soal di menu Paket Soal, lalu import lagi.', 'warn');
+    const kosong = rows.filter(r => !String(r.paket_soal_id || '').trim()).length;
+    if (kosong) {
+      const pilih = await pilihPaketSoal(daftar, kosong, rows.length, S.ui.f_banksoal);
+      if (!pilih) return;
+      rows.forEach(r => { if (!String(r.paket_soal_id || '').trim()) r.paket_soal_id = pilih; });
+    }
+    const salah = [...new Set(rows.map(r => r.paket_soal_id).filter(id => !daftar.some(p => p.id === id)))];
+    if (salah.length) return toast('paket_soal_id tidak dikenal: ' + salah.slice(0, 3).join(', ') + '. Kosongkan kolom itu agar bisa memilih paket.', 'err', 6000);
+  }
   if (!await confirmBox(`Import <b>${rows.length}</b> baris ke ${M.judul}? Baris dengan id sama akan diperbarui.<br><span class="tiny muted">Kolom dikenali: ${Object.keys(rows[0]).map(esc).join(', ')}</span>`, 'Import')) return;
   try { const r = await API.call('a.import', { sheet: M.sheet, rows }, { timeout: 120000 }); toast(`Import selesai: ${r.ins} baru, ${r.upd} diperbarui`); delete S.ad[M.sheet]; render(false); } catch (e) { toast(e.message, 'err'); }
 }
