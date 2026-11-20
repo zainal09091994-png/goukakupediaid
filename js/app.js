@@ -410,7 +410,7 @@ function shellPub(route, body) {
       `<button class="btn btn-light btn-sm" data-go="masuk">Masuk</button><button class="btn btn-red btn-sm only-d" data-go="coba">Coba Gratis</button>`}
     </div></div></header>`;
   const foot = ['home', 'legal'].indexOf(route) > -1 ? footer(b) : '';
-  const fab = b.wa ? `<a class="fab-wa" href="${waLink(b.wa, 'Halo Admin Goukaku Pedia ID, saya ingin bertanya tentang kelas persiapan 介護福祉士.')}" target="_blank" rel="noopener" aria-label="Chat WhatsApp admin" data-act="kunjunganWA">${WA_SVG}</a>` : '';
+  const fab = b.wa ? `<a class="fab-wa" href="${waLink(b.wa, 'Halo Admin Goukaku Pedia ID, saya ingin bertanya tentang kelas persiapan 介護福祉士.')}" target="_blank" rel="noopener" aria-label="Chat WhatsApp admin">${WA_SVG}</a>` : '';
   return nav + `<main id="pub" class="fadein">${body}</main>` + foot + fab;
 }
 function footer(b) {
@@ -431,6 +431,8 @@ function footer(b) {
 }
 ACT.ke = el => { if (S.route !== 'home') { go('home'); setTimeout(() => ACT.ke(el), 60); return; } const t = document.getElementById(el.dataset.to); if (t) window.scrollTo({ top: t.getBoundingClientRect().top + window.scrollY - 70, behavior: 'smooth' }); };
 ACT.kunjunganWA = () => { API.call('p.kunjungan', { sumber: 'tombol_wa' }, { silent: true }).catch(() => { }); };
+/* Tombol WA melayang: catat kunjungan TANPA mencegah tautan wa.me dibuka */
+document.addEventListener('click', e => { if (e.target.closest('.fab-wa')) ACT.kunjunganWA(); });
 
 /* Muat konten publik: tampil dari cache dulu, perbarui di latar */
 async function muatPublik() {
