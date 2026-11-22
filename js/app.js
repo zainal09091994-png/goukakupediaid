@@ -402,6 +402,7 @@ function shellPub(route, body) {
   const nav = `<header class="pnav"><div class="pnav-in">
     <a href="javascript:void(0)" data-go="home" aria-label="Beranda">${logo()}</a>
     <nav class="pnav-menu" aria-label="Menu">
+      ${S.pub && S.pub.promo && S.pub.promo.length ? '<a href="javascript:void(0)" data-act="ke" data-to="promo">PAKET PROMO</a>' : ''}
       <a href="javascript:void(0)" data-act="ke" data-to="paket">Paket</a><a href="javascript:void(0)" data-act="ke" data-to="lulus">Bukti Lulus</a>
       <a href="javascript:void(0)" data-act="ke" data-to="kurikulum">Kurikulum</a><a href="javascript:void(0)" data-act="ke" data-to="faq">FAQ</a></nav>
     <div class="row">
@@ -444,6 +445,12 @@ async function muatPublik() {
 }
 
 /* ---------- Beranda publik ---------- */
+/* Hitung mundur 2 ujian berdampingan (mis. 第39回 dan 第40回) */
+function hitungMundurDepan(P) {
+  const list = P.jadwal_depan || [];
+  if (!list.length) return '';
+  return `<div class="row wrap gap4" style="justify-content:center">${list.map(j => `<div class="center"><div class="tiny" style="opacity:.9;text-transform:uppercase;letter-spacing:.08em;font-weight:700">Hitung mundur ${esc(j.nama)}</div><div class="mt2">${cdBox(j.tanggal)}</div></div>`).join('')}</div>`;
+}
 R.home = () => {
   S.ui.title = '';
   const P = S.pub;
@@ -455,13 +462,15 @@ R.home = () => {
       <div class="row wrap mt4"><button class="btn btn-white" data-act="cta" data-link="${esc(h.cta_link || '#coba')}">${esc(h.cta_teks || 'Coba Gratis')} ${ic('arrow_forward')}</button>
       ${/paket/i.test(h.cta_link || '') ? `<button class="btn btn-ghost" style="color:#fff;box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.5)" data-act="ke" data-to="coba">Coba Gratis</button>` : `<button class="btn btn-ghost" style="color:#fff;box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.5)" data-act="ke" data-to="paket">Lihat Paket</button>`}</div>
       ${h.gambar_url ? `<img class="slide-img mt4" src="${esc(h.gambar_url)}" alt="${esc(h.judul)}" loading="${i ? 'lazy' : 'eager'}">` : ''}</div>`).join('');
-  const art = `<div class="hero-art" aria-hidden="true"><div class="book">
+  const kotak = P.brand && P.brand.gambar_kotak;
+  const art = `<div class="hero-art" aria-hidden="true"><div class="book" ${kotak ? 'style="padding:0;overflow:hidden"' : ''}>${kotak ? `<img src="${esc(kotak)}" alt="" style="width:100%;height:100%;object-fit:cover;display:block">` : ''}<div style="${kotak ? 'display:none' : 'display:flex;flex-direction:column;gap:10px;padding:20px;height:100%'}">
       <div class="row-b"><span class="chip" style="background:rgba(255,255,255,.18);color:#fff">科目: 介護の基本</span><span class="tiny" style="opacity:.8">Soal #05</span></div>
       <div class="jp" style="font-size:17px;line-height:2.1">${furi('｜尊厳《そんげん》の｜保持《ほじ》と｜自立支援《じりつしえん》について、より｜適切《てきせつ》なものを１つ｜選《えら》びなさい。')}</div>
       <div style="background:rgba(22,163,74,.25);border-radius:10px;padding:8px 10px;font-size:13px">✓ 2. ${furi('｜残存能力《ざんぞんのうりょく》を｜活《い》かし…')}</div>
       <div style="background:rgba(255,255,255,.12);border-radius:10px;padding:8px 10px;font-size:12.5px">\uD83D\uDCA1 <b>TRIK JITU:</b> kata すべて / 必ず hampir selalu SALAH</div>
-    </div>${stamp('lg')}</div>`;
+    </div></div>${stamp('lg')}</div>`;
   const promo = P.promo.map(p => `<div class="promo-band" id="promo-${esc(p.id)}">
+      ${p.gambar ? `<img class="promo-img" src="${esc(p.gambar)}" alt="Gambar promo ${esc(p.judul)}" loading="lazy">` : ''}
       <div class="f1" style="min-width:220px"><span class="chip" style="background:#fff;color:var(--c-red)">${ic('local_fire_department')} PROMO</span>
       <h3 class="mt2" style="color:#fff">${esc(p.judul)}</h3><p class="small" style="opacity:.92">${esc(p.teks)}</p>
       <div class="mt2"><span class="price" style="color:#fff">${rp(p.harga)}</span></div></div>
@@ -477,10 +486,10 @@ R.home = () => {
   <section class="hero"><div class="glow" style="width:260px;height:260px;right:-60px;top:-60px;background:rgba(191,230,246,.2)"></div>
     <div class="hero-in"><div><div class="slides" id="slides">${slides}</div>
       ${hero.length > 1 ? `<div class="row mt3"><button class="btn-ico sm" style="color:#fff" data-act="slide" data-d="-1" aria-label="Sebelumnya">${ic('chevron_left')}</button><div class="dots">${hero.map((h, i) => `<button class="${i === 0 ? 'on' : ''}" data-act="slideKe" data-i="${i}" aria-label="Slide ${i + 1}"></button>`).join('')}</div><button class="btn-ico sm" style="color:#fff" data-act="slide" data-d="1" aria-label="Berikutnya">${ic('chevron_right')}</button></div>` : ''}
-      ${u ? `<div class="mt4"><div class="tiny" style="opacity:.85;text-transform:uppercase;letter-spacing:.08em;font-weight:700">Hitung mundur ${esc(u.nama)}</div><div class="mt2">${cdBox(u.tanggal)}</div></div>` : ''}
+      <div class="mt4">${hitungMundurDepan(P)}</div>
     </div>${art}</div></section>
   <svg class="wave" viewBox="0 0 1200 40" preserveAspectRatio="none"><path d="M0 20 Q 150 0 300 20 T 600 20 T 900 20 T 1200 20" stroke="currentColor" stroke-width="3" fill="none"/></svg>
-  ${promo ? `<section class="psec tight"><div class="wrapx col gap3">${promo}</div></section>` : ''}
+  ${promo ? `<section class="psec tight" id="promo"><div class="wrapx col gap3">${promo}</div></section>` : ''}
   <section class="psec tight"><div class="wrapx">
     <div class="stat-strip"><div class="card"><b>${num(P.stat.murid).toLocaleString('id-ID')}+</b><span class="small muted">Murid</span></div><div class="card"><b>${num(P.stat.lulus).toLocaleString('id-ID')}+</b><span class="small muted">Lulus 合格</span></div><div class="card"><b>${num(P.stat.soal).toLocaleString('id-ID')}+</b><span class="small muted">Soal dibahas</span></div></div>
     <div class="psec-h" style="margin-top:44px"><h2>Kenapa <span style="color:var(--c-red)">TRIK JITU</span>?</h2><p>Setiap soal dibahas dengan 4 bagian khas Goukaku Pedia ID — seperti di modul pembahasan.</p></div>
@@ -494,7 +503,7 @@ R.home = () => {
         ${t.pesan_singkat ? `<blockquote class="card mt4" style="border-left:4px solid var(--c-primary-2);margin:16px 0 0">“${furi(t.pesan_singkat)}”</blockquote>` : ''}
         <div class="row mt4 wrap"><a class="btn btn-light btn-sm" href="https://www.tiktok.com/@${esc(t.tiktok || 'goukakupedia.id')}" target="_blank" rel="noopener">TikTok @${esc(t.tiktok || 'goukakupedia.id')}</a><a class="btn btn-light btn-sm" href="https://www.instagram.com/${esc(t.instagram || 'goukakupedia.id')}" target="_blank" rel="noopener">Instagram @${esc(t.instagram || 'goukakupedia.id')}</a></div>
       </div></div></div></section>` : ''}
-  <section class="psec tight"><div class="wrapx"><div class="band-coba"><div><h2>Coba 10 soal gratis sekarang</h2><p class="muted mt1">Tanpa daftar akun. Lihat skor dan contoh pembahasan TRIK JITU.</p></div><button class="btn btn-red" data-go="coba">${ic('play_circle', 'fill')} Mulai Coba Gratis</button></div></div></section>
+  <section class="psec tight"><div class="wrapx"><div class="band-coba"><div><h2>Coba simulasi ujian gratis</h2><p class="muted mt1">125 soal dalam 2 sesi bertimer (午前 105 menit, 午後 115 menit). Tanpa daftar akun, dan PDF simulasi bisa diunduh gratis.</p></div><button class="btn btn-red" data-go="coba">${ic('play_circle', 'fill')} Mulai Simulasi Gratis</button></div></div></section>
   <section class="psec"><div class="wrapx"><div class="psec-h"><h2>Isi Kelas</h2><p>Semua yang kamu butuhkan dari hari pertama sampai hari ujian.</p></div>
     <div class="grid g3">${fitur.map(f => `<div class="card feat"><div class="ic">${ic(f[0])}</div><div><h3>${furi(f[1])}</h3><p class="small muted mt1">${furi(f[2])}</p></div></div>`).join('')}</div></div></section>
   <section class="psec" id="paket"><div class="wrapx"><div class="psec-h"><h2>Paket & Harga</h2><p>Masa aktif sampai hari ujian angkatanmu. Bayar aman lewat Lynk.id.</p></div>
@@ -510,7 +519,7 @@ R.home = () => {
   <section class="psec" id="faq"><div class="wrapx" style="max-width:820px"><div class="psec-h"><h2>Pertanyaan Umum</h2></div>
     <div class="acc">${P.faq.map(f => `<details><summary>${esc(f.pertanyaan)}${ic('expand_more')}</summary><div class="acc-b">${md(f.jawaban)}</div></details>`).join('')}</div></div></section>
   <section class="psec"><div class="wrapx"><div class="hero" style="border-radius:24px;padding:32px 20px;text-align:center"><h2 style="color:#fff">Siap meraih 合格?</h2>
-    ${u ? `<p class="mt2" style="opacity:.9">${esc(u.nama)} tinggal:</p><div class="row mt3" style="justify-content:center">${cdBox(u.tanggal)}</div>` : ''}
+    <div class="mt3">${hitungMundurDepan(P)}</div>
     <div class="row wrap mt5" style="justify-content:center"><button class="btn btn-white" data-act="ke" data-to="paket">Daftar Sekarang</button><button class="btn btn-red" data-go="coba">Coba Gratis</button></div></div></div></section>`;
 };
 function paketCard(p) {
@@ -553,11 +562,19 @@ ACT.suara = el => {
 
 /* ---------- Coba Gratis ---------- */
 R.coba = () => {
-  S.ui.title = 'Coba Gratis';
-  const c = S.coba || (S.coba = { step: 'form' });
+  S.ui.title = 'Coba Simulasi Ujian Gratis';
+  // Simulasi yang sedang berjalan dipulihkan setelah refresh (timer tetap mengikuti jam)
+  if (!S.coba) {
+    const t = LS.get('gp_coba', null);
+    S.coba = t && (t.step === 'sesi' || t.step === 'antara') ? t : { step: 'form' };
+    if (S.coba.step === 'sesi') cobaJalankanTimer();
+  }
+  const c = S.coba;
+  if (c.step === 'sesi' || c.step === 'antara') LS.set('gp_coba', Object.assign({}, c, { hasil: undefined, gagal: false }));
   if (c.step === 'form') {
     const j = (S.pub && S.pub.jadwal) || [];
-    return `<div class="auth"><div class="card" style="max-width:520px"><span class="chip red">${ic('bolt')} GRATIS</span><h2 class="mt2">Coba 10 Soal Gratis</h2><p class="muted small mt1">Isi data singkat, lalu langsung kerjakan soal. Di akhir kamu dapat skor + contoh pembahasan TRIK JITU.</p>
+    return `<div class="auth"><div class="card" style="max-width:520px"><span class="chip red">${ic('bolt')} GRATIS</span><h2 class="mt2">Coba Simulasi Ujian Gratis</h2><p class="muted small mt1">125 soal dalam 2 sesi bertimer: 午前 (Aパート) 105 menit, lalu 午後 (Bパート & Cパート) 115 menit. Isi data singkat untuk memulai.</p>
+      ${S.pub && S.pub.brand && S.pub.brand.pdf_coba ? `<a class="btn btn-light btn-block mt3" href="${esc(S.pub.brand.pdf_coba)}" target="_blank" rel="noopener">${ic('download')} Unduh PDF simulasi (gratis)</a>` : ''}
       <form data-form="coba" class="mt4" novalidate>
         <input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
         <div class="fld"><label for="cNama">Nama</label><input id="cNama" class="inp" name="nama" required autocomplete="name" placeholder="Nama lengkap"></div>
@@ -569,26 +586,39 @@ R.coba = () => {
         <p class="tiny muted mb3">Data kamu dipakai sesuai <a href="javascript:void(0)" data-go="legal" data-id="privasi">Kebijakan Privasi</a>.</p>
         <button class="btn btn-red btn-block" type="submit">Mulai Kerjakan ${ic('arrow_forward')}</button></form></div></div>`;
   }
-  if (c.step === 'quiz') {
+  if (c.step === 'antara') {
+    const terjawab = Object.keys(c.jawab).length;
+    return `<div class="auth"><div class="card" style="max-width:520px"><span class="chip red">${ic('timer')} Sesi 午前 selesai</span><h2 class="mt2">Lanjut ke 午後</h2>
+      <p class="muted small mt2">Kamu sudah menjawab ${terjawab} soal di sesi 午前. Sesi 午後 (Bパート & Cパート) berlangsung 115 menit dan timer mulai saat kamu menekan tombol di bawah.</p>
+      <button class="btn btn-red btn-block mt4" data-act="cobaSesi2">Mulai Sesi 午後 ${ic('arrow_forward')}</button></div></div>`;
+  }
+  if (c.step === 'sesi') {
     const q = c.soal[c.idx], n = c.soal.length, jaw = c.jawab[q.id];
+    const terjawab = c.soal.filter(s => c.jawab[s.id] !== undefined).length;
     return `<div class="wrapx" style="max-width:820px;padding-top:16px;padding-bottom:100px">
-      <div class="row-b mb3"><span class="chip">${ic('quiz')} Coba Gratis</span><b class="small">Soal ${c.idx + 1} / ${n}</b></div>
-      <div class="bar mb4"><i style="width:${pct(Object.keys(c.jawab).length, n)}%"></i></div>
+      <div class="row-b mb3"><span class="chip">${ic('timer')} ${c.sesi === '午前' ? '午前 · Aパート' : '午後 · Bパート & Cパート'}</span><b id="cobaWaktu" class="small">${fWaktuSisa(c.akhir - Date.now())}</b></div>
+      <div class="row-b mb3"><span class="tiny muted">Soal ${c.idx + 1} / ${n}</span><span class="tiny muted">Terjawab ${terjawab} / ${n} di sesi ini</span></div>
+      <div class="bar mb4"><i style="width:${pct(terjawab, n)}%"></i></div>
       ${soalHTML(q, { pilih: jaw, terjemah: c.terjemah, nomor: c.idx + 1 })}
       <div class="row-b mt4"><button class="btn btn-light" data-act="cobaNav" data-d="-1" ${c.idx === 0 ? 'disabled' : ''}>${ic('chevron_left')} Sebelumnya</button>
-      ${c.idx < n - 1 ? `<button class="btn btn-primary" data-act="cobaNav" data-d="1">Berikutnya ${ic('chevron_right')}</button>` : `<button class="btn btn-red" data-act="cobaSelesai">Selesai & Lihat Skor ${ic('flag')}</button>`}</div></div>`;
+      ${c.idx < n - 1 ? `<button class="btn btn-primary" data-act="cobaNav" data-d="1">Berikutnya ${ic('chevron_right')}</button>` : `<button class="btn btn-red" data-act="cobaSelesai">${c.sesi === '午前' ? 'Selesai Sesi 午前' : 'Selesai & Kirim Skor'} ${ic('flag')}</button>`}</div></div>`;
   }
-  // hasil
-  const benar = c.soal.filter(q => String(c.jawab[q.id]) === String(q.kunci)).length, contoh = c.soal.find(q => String(c.jawab[q.id]) !== String(q.kunci)) || c.soal[0];
+  // hasil: skor dari server (kunci jawaban tidak dikirim ke browser)
+  if (!c.hasil) {
+    if (c.gagal) return `<div class="auth"><div class="card center"><h3>Skor belum terkirim</h3><p class="small muted mt2">Koneksi bermasalah. Jawabanmu masih tersimpan di halaman ini.</p><button class="btn btn-primary btn-block mt4" data-act="cobaKirimUlang">Kirim ulang</button></div></div>`;
+    return `<div class="wrapx mt5"><div class="sk" style="height:260px"></div></div>`;
+  }
+  const h = c.hasil, s1 = h.sesi['午前'], s2 = h.sesi['午後'];
   return `<div class="wrapx" style="max-width:860px;padding:20px 16px 60px">
-    <div class="res-hero"><div class="tiny" style="letter-spacing:.1em;text-transform:uppercase;opacity:.85">Skor Coba Gratis</div><div class="score mt2">${benar}<span style="font-size:28px;opacity:.7">/${c.soal.length}</span></div>
-      <p class="mt2">${benar >= 6 ? 'Hebat! Dasarmu sudah bagus. Tinggal diasah dengan TRIK JITU \uD83D\uDD25' : 'Tidak apa-apa! Dengan Alur Belajar & TRIK JITU, nilaimu pasti naik \uD83D\uDCAA'}</p>
-      <div class="row wrap mt4" style="justify-content:center"><button class="btn btn-white" data-act="ke" data-to="paket">Daftar Sekarang</button><button class="btn btn-ghost" style="color:#fff" data-act="cobaUlang">Ulangi</button></div></div>
-    <h3 class="mt5 mb3">Contoh pembahasan lengkap</h3>
-    ${soalHTML(contoh, { pilih: c.jawab[contoh.id], tampilKunci: true, terjemah: true })}
-    <div class="mt4">${trikHTML(contoh)}</div>
-    <div class="band-coba mt5"><div><h3>Mau semua soal dibahas seperti ini?</h3><p class="small muted">13 paket soal + 模擬試験 + kelas Zoom.</p></div><button class="btn btn-primary" data-act="ke" data-to="paket">Lihat Paket</button></div></div>`;
+    <div class="res-hero"><div class="tiny" style="letter-spacing:.1em;text-transform:uppercase;opacity:.85">Skor Simulasi Ujian Gratis</div><div class="score mt2">${h.benar}<span style="font-size:28px;opacity:.7">/${h.total}</span></div>
+      <p class="mt2">午前 (Aパート): ${s1.benar}/${s1.total} · 午後 (Bパート & Cパート): ${s2.benar}/${s2.total}</p>
+      <p class="mt2">${pct(h.benar, h.total) >= 60 ? 'Hebat! Dasarmu sudah bagus. Tinggal diasah dengan TRIK JITU \uD83D\uDD25' : 'Tidak apa-apa! Dengan Alur Belajar & TRIK JITU, nilaimu pasti naik \uD83D\uDCAA'}</p>
+      <div class="row wrap mt4" style="justify-content:center">${h.pdf ? `<a class="btn btn-white" href="${esc(h.pdf)}" target="_blank" rel="noopener">${ic('download')} Unduh PDF Simulasi</a>` : ''}<button class="btn btn-ghost" style="color:#fff" data-act="ke" data-to="paket">Daftar Sekarang</button><button class="btn btn-ghost" style="color:#fff" data-act="cobaUlang">Ulangi</button></div></div>
+    ${h.pembahasan && h.pembahasan.length ? `<h3 class="mt5 mb2">Pembahasan soal yang belum tepat</h3><p class="small muted mb3">Menampilkan ${h.pembahasan.length} soal pertama yang belum tepat.</p>${h.pembahasan.map(q => `${soalHTML(q, { pilih: c.jawab[q.id], tampilKunci: true, terjemah: true, noLapor: true })}<div class="mt3 mb5">${trikHTML(q)}</div>`).join('')}` : ''}
+    <div class="band-coba mt5"><div><h3>Mau pembahasan lengkap semua soal?</h3><p class="small muted">13 paket soal + 模擬試験 + kelas Zoom.</p></div><button class="btn btn-primary" data-act="ke" data-to="paket">Lihat Paket</button></div></div>`;
 };
+/* Format sisa waktu mm:ss */
+function fWaktuSisa(ms) { const t = Math.max(0, Math.floor(ms / 1000)); return String(Math.floor(t / 60)).padStart(2, '0') + ':' + String(t % 60).padStart(2, '0'); }
 FORM.coba = (f, d) => kunciTombol(f, async () => {
   if (!d.nama || d.nama.trim().length < 2) return errField(f, 'nama', 'Nama wajib diisi');
   if (!/^(\+?62|0)8\d{7,12}$/.test(String(d.no_wa).replace(/[\s-]/g, ''))) return errField(f, 'no_wa', 'Nomor WA tidak valid. Contoh: 08123456789');
@@ -596,19 +626,53 @@ FORM.coba = (f, d) => kunciTombol(f, async () => {
   errField(f);
   try {
     const r = await API.call('p.coba.mulai', d);
-    if (!r.soal.length) return toast('Soal gratis belum tersedia.', 'warn');
-    S.coba = { step: 'quiz', lead_id: r.lead_id, soal: r.soal, idx: 0, jawab: {}, terjemah: false };
+    if (!r.soal.length) return toast('Soal simulasi belum tersedia.', 'warn');
+    S.coba = { step: 'sesi', sesi: '午前', lead_id: r.lead_id, soal: r.soal, idx: 0, jawab: {}, terjemah: false, akhir: Date.now() + r.menit * 60000 };
+    cobaJalankanTimer();
     render(true);
   } catch (e) { toast(e.message, 'err'); }
 });
 ACT.cobaNav = el => { S.coba.idx = Math.max(0, Math.min(S.coba.soal.length - 1, S.coba.idx + num(el.dataset.d))); render(true); };
-ACT.cobaSelesai = async () => {
-  const c = S.coba, belum = c.soal.length - Object.keys(c.jawab).length;
-  if (belum && !await confirmBox(`Masih ada ${belum} soal belum dijawab. Selesaikan sekarang?`, 'Selesai')) return;
-  c.step = 'hasil'; render(true);
-  API.call('p.coba.hasil', { lead_id: c.lead_id, jawaban: c.jawab }, { silent: true }).catch(() => { });
+/* Timer sesi: berjalan di latar, otomatis mengirim jawaban saat waktu habis */
+function cobaJalankanTimer() {
+  cobaHentikanTimer();
+  S.cobaTimer = setInterval(() => {
+    const c = S.coba, el = document.getElementById('cobaWaktu');
+    if (!c || c.step !== 'sesi' || !el) return;
+    const sisa = c.akhir - Date.now();
+    if (sisa <= 0) { toast('Waktu sesi habis, jawaban dikirim otomatis', 'warn', 4000); cobaSelesaiSesi(true); return; }
+    el.textContent = fWaktuSisa(sisa);
+  }, 1000);
+}
+function cobaHentikanTimer() { if (S.cobaTimer) clearInterval(S.cobaTimer); S.cobaTimer = null; }
+async function cobaSelesaiSesi(otomatis) {
+  const c = S.coba;
+  if (!c || c.step !== 'sesi') return;
+  const belum = c.soal.filter(q => c.jawab[q.id] === undefined).length;
+  if (!otomatis && belum && !await confirmBox(`Masih ada ${belum} soal belum dijawab. Selesaikan sesi ini sekarang?`, 'Selesai')) return;
+  cobaHentikanTimer();
+  if (c.sesi === '午前') { c.step = 'antara'; render(true); return; }
+  c.step = 'hasil'; c.hasil = null; c.gagal = false; render(true);
+  await cobaKirimHasil();
+}
+async function cobaKirimHasil() {
+  const c = S.coba;
+  try { c.hasil = await API.call('p.coba.hasil', { lead_id: c.lead_id, jawaban: c.jawab }); LS.del('gp_coba'); }
+  catch (e) { c.gagal = true; toast(e.message, 'err'); }
+  render(true);
+}
+ACT.cobaSelesai = () => cobaSelesaiSesi(false);
+ACT.cobaKirimUlang = () => { S.coba.gagal = false; render(true); cobaKirimHasil(); };
+ACT.cobaSesi2 = async el => {
+  const c = S.coba; el.classList.add('loading');
+  try {
+    const r = await API.call('p.coba.sesi', { lead_id: c.lead_id, sesi: '午後' });
+    if (!r.soal.length) { el.classList.remove('loading'); return toast('Soal sesi 午後 belum tersedia.', 'warn'); }
+    Object.assign(c, { step: 'sesi', sesi: '午後', soal: r.soal, idx: 0, akhir: Date.now() + r.menit * 60000 });
+    cobaJalankanTimer(); render(true);
+  } catch (e) { el.classList.remove('loading'); toast(e.message, 'err'); }
 };
-ACT.cobaUlang = () => { S.coba = { step: 'form' }; render(true); };
+ACT.cobaUlang = () => { cobaHentikanTimer(); LS.del('gp_coba'); S.coba = { step: 'form' }; render(true); };
 
 /* ---------- Daftar ---------- */
 R.daftar = p => {
@@ -729,7 +793,7 @@ ACT.pasangApp = async () => {
  * Beranda (countdown + target minggu ini), Belajar (Alur, Materi PDF, Gambar,
  * Kosakata + Flashcard), Zoom, Profil, pengumuman, sambutan, laporkan.
  * ========================================================================== */
-const MNAV = [['m/beranda', 'home', 'Beranda'], ['m/belajar', 'auto_stories', 'Belajar'], ['m/soal', 'assignment', 'Soal'], ['m/zoom', 'videocam', 'Zoom'], ['m/riwayat', 'analytics', 'Riwayat'], ['m/profil', 'person', 'Profil']];
+const MNAV = [['m/beranda', 'home', 'Beranda'], ['m/belajar', 'auto_stories', 'Belajar'], ['m/soal', 'assignment', 'Bank Soal'], ['m/zoom', 'videocam', 'Zoom'], ['m/riwayat', 'analytics', 'Riwayat'], ['m/profil', 'person', 'Profil']];
 const MNAV_ROOT = { 'm/kartu': 'm/belajar', 'm/kuis': 'm/soal', 'm/hasil': 'm/soal' };
 
 function shellMember(route, body) {
@@ -840,8 +904,9 @@ R['m/beranda'] = () => {
     <div class="card">${ring(mogi ? pct(mogi.skor, mogi.total) : 0, 52, 5, `<span style="font-size:12px">${mogi ? pct(mogi.skor, mogi.total) + '%' : '–'}</span>`, mogi && pct(mogi.skor, mogi.total) >= B.garis_aman ? 'var(--c-ok)' : 'var(--c-amber)')}<b class="mt1">模擬試験</b><span class="tiny muted">Nilai terakhir</span></div>
     <div class="card"><div class="ring" style="width:52px;height:52px;border-radius:50%;background:#FFDAD6;font-size:24px">\uD83D\uDD25</div><b class="mt1" style="color:var(--c-red)">${st} Hari</b><span class="tiny muted">Daily streak</span></div></div></section>`;
   const peng = pin.length ? `<section style="order:4" class="col gap2">${pin.map(p => `<div class="card row" style="border-left:4px solid var(--c-red);cursor:pointer" data-act="bukaPeng" data-id="${esc(p.id)}">${ic('campaign', 'fill')}<div class="f1"><b class="small">${esc(p.judul)}</b><div class="tiny muted trunc">${esc(p.isi)}</div></div>${ic('chevron_right')}</div>`).join('')}</section>` : '';
-  const kel = {}; B.materi.forEach(m => { (kel[m.kamoku] = kel[m.kamoku] || []).push(m); });
-  const materi = `<section style="order:5"><div class="row-b mb2"><h3 class="sec-title">Materi Saya</h3><button class="link small" data-go="m/belajar" data-tab="materi">Semua (${B.materi.length})</button></div>
+  const materiBelajar = B.materi.filter(m => m.kelompok !== 'ringkasan_trik' && m.kelompok !== 'semua_soal');
+  const kel = {}; materiBelajar.forEach(m => { (kel[m.kamoku] = kel[m.kamoku] || []).push(m); });
+  const materi = `<section style="order:5"><div class="row-b mb2"><h3 class="sec-title">Materi Saya</h3><button class="link small" data-go="m/belajar" data-tab="materi">Semua (${materiBelajar.length})</button></div>
     <div class="grid g3">${Object.keys(kel).slice(0, 3).map((k, i) => { const l = kel[k], d = l.filter(m => m.selesai).length, p = pct(d, l.length); return `<div class="card hov col gap2"><div class="row-b"><span class="chip pale">科目 ${String(B.kamoku.indexOf(k) + 1).padStart(2, '0')}</span><span class="tiny muted">${l.length} materi</span></div>
       <b class="jp" style="font-size:17px">${furi(KANA[k] ? '｜' + k + '《' + KANA[k] + '》' : k)}</b><p class="tiny muted trunc">${esc(l[0].judul)}</p>
       <div class="row-b tiny"><span class="muted">Progres</span><b style="color:var(--c-primary-2)">${p}%</b></div><div class="bar"><i style="width:${p}%"></i></div>
@@ -892,9 +957,25 @@ ACT.tutupDrawer = () => { const d = $('#drw'); if (d) d.remove(); };
 ACT.bukaPeng = el => { const p = S.boot.pengumuman.find(x => x.id === el.dataset.id); if (!p) return; S.read[p.id] = 1; LS.set('gp_read', S.read); modal(`${p.gambar ? `<img src="${esc(p.gambar)}" alt="" style="border-radius:12px" class="mb3">` : ''}<div style="line-height:1.7">${md(p.isi)}</div>`, { title: esc(p.judul) }); };
 
 /* ---------- BELAJAR ---------- */
+const MAT_KAMOKU = ['人間の尊厳と自立', '介護の基本', '社会の理解', '人間関係とコミュニケーション', 'コミュニケーション技術', '生活支援技術', '介護過程', 'こころとからだのしくみ', '発達と老化の理解', '認知症の理解', '障害の理解', '医療的ケア'];
+const KELOMPOK_MATERI = { terjemahan: 'MATERI TERJEMAHAN DENGAN BAHASA BAYI', ilustrasi: 'BELAJAR DENGAN ILUSTRASI BERGAMBAR', ringkasan_trik: 'RINGKASAN TRIK JITU', semua_soal: 'SEMUA SOAL' };
+/* Urutan 科目: 12 科目 utama dulu, lalu 科目 lain (mis. 総合問題) di belakang */
+function urutKamoku(data) { const ex = [...new Set(data.map(x => x.kamoku))].filter(k => k && MAT_KAMOKU.indexOf(k) < 0); return MAT_KAMOKU.concat(ex); }
+const kanaHead = k => furi(KANA[k] ? '｜' + k + '《' + KANA[k] + '》' : k);
+/* Pengaturan tampilan per layar: terjemahan & furigana (tersimpan di perangkat) */
+function tgGet(k) { const d = k === 'soal' ? { terj: false, furi: true } : { terj: true, furi: true }; return Object.assign(d, LS.get('gp_tg_' + k) || {}); }
+function tgCls(k) { const t = tgGet(k); return (t.furi ? '' : 'nofuri ') + (t.terj ? '' : 'noterj'); }
+function togBar(k) {
+  const t = tgGet(k);
+  return `<div class="tg-bar" role="group" aria-label="Pengaturan tampilan">
+    <button class="tg ${t.terj ? 'on' : ''}" aria-pressed="${t.terj}" data-act="togTg" data-k="${k}" data-f="terj">${ic('translate')} Terjemahan ${t.terj ? 'ON' : 'OFF'}</button>
+    <button class="tg ${t.furi ? 'on' : ''}" aria-pressed="${t.furi}" data-act="togTg" data-k="${k}" data-f="furi">${ic('text_fields')} Furigana ${t.furi ? 'ON' : 'OFF'}</button></div>`;
+}
+ACT.togTg = el => { const k = el.dataset.k, t = tgGet(k); t[el.dataset.f] = !t[el.dataset.f]; LS.set('gp_tg_' + k, t); render(false); };
+
 R['m/belajar'] = p => {
   const B = S.boot, tab = p.tab || S.ui.tabBelajar || 'alur'; S.ui.tabBelajar = tab; S.ui.title = 'Belajar';
-  const tabs = [['alur', 'route', 'Alur Belajar'], ['materi', 'picture_as_pdf', 'Materi PDF'], ['gambar', 'image', 'Belajar Gambar'], ['kosakata', 'style', 'Kosakata']];
+  const tabs = [['alur', 'route', 'Alur Belajar'], ['materi', 'picture_as_pdf', KELOMPOK_MATERI.terjemahan], ['gambar', 'image', KELOMPOK_MATERI.ilustrasi], ['kosakata', 'style', 'FLASH CARD KOSAKATA']];
   const head = `<div class="tabs" role="tablist">${tabs.map(t => `<button class="tab ${tab === t[0] ? 'on' : ''}" role="tab" aria-selected="${tab === t[0]}" data-go="m/belajar" data-tab="${t[0]}">${ic(t[1])}${t[2]}</button>`).join('')}</div>`;
   if (tab === 'alur') {
     const tgt = {}; (B.target.target || []).forEach(x => tgt[x.id] = 1);
@@ -906,36 +987,49 @@ R['m/belajar'] = p => {
         <button class="btn ${a.selesai ? 'btn-light' : 'btn-primary'} btn-sm" data-act="bukaItem" data-tipe="${esc(a.tipe_item)}" data-id="${esc(a.item_id)}">${a.selesai ? 'Buka lagi' : 'Mulai'}</button></div>`).join('') || '<div class="empty">Alur belajar belum disusun admin.</div>'}</div></div>`;
   }
   if (tab === 'materi' || tab === 'gambar') {
-    const list = B.materi.filter(m => tab === 'gambar' ? m.tipe === 'gambar' : m.tipe !== 'gambar'), kel = {};
-    list.forEach(m => (kel[m.kamoku] = kel[m.kamoku] || []).push(m));
-    return head + (Object.keys(kel).map(k => `<div><h3 class="jp mb2">${furi(KANA[k] ? '｜' + k + '《' + KANA[k] + '》' : k)}</h3><div class="grid g3">${kel[k].map(m => `<div class="card hov tap list-card" data-act="bukaMateri" data-id="${esc(m.id)}" role="button" tabindex="0">
-      <div class="kbox ${m.selesai ? '' : 'navy'}">${ic(m.tipe === 'gambar' ? 'photo_library' : m.tipe === 'teks' ? 'article' : 'picture_as_pdf')}</div>
-      <div class="f1"><b style="display:block">${furi(m.judul)}</b><span class="tiny muted">${m.tipe === 'gambar' ? m.jumlah_gambar + ' gambar' : m.tipe === 'teks' ? 'Teks' : 'PDF · baca online'}</span></div>
-      ${m.selesai ? `<span class="chip ok">${ic('check')} Selesai</span>` : ic('chevron_right')}</div>`).join('')}</div></div>`).join('') || `<div class="card empty">${ic('folder_open')}<p>Belum ada ${tab === 'gambar' ? 'materi gambar' : 'materi'}.</p></div>`);
+    const kel = tab === 'gambar' ? 'ilustrasi' : 'terjemahan';
+    return head + matGrupHTML(kel, kel === 'ilustrasi' ? 'Belum ada materi bergambar.' : 'Belum ada materi terjemahan.');
   }
-  // kosakata
+  // FLASH CARD KOSAKATA
   const kam = S.ui.kamoku || '', q = (S.ui.qKosa || '').toLowerCase(), stt = B.kosakata_status;
   const daftar = B.kosakata.filter(k => (!kam || k.kamoku === kam) && (!q || (plainJP(k.jp) + k.jp + k.arti + plainJP(k.cjp)).toLowerCase().indexOf(q) > -1));
   const semua = B.kosakata.filter(k => !kam || k.kamoku === kam);
   const hafal = semua.filter(k => stt[k.id] === 'hafal').length, belum = semua.filter(k => stt[k.id] === 'belum').length, pent = semua.filter(k => k.penting).length;
-  const kams = [...new Set(B.kosakata.map(k => k.kamoku))];
-  return head + `<div class="card"><div class="row-b"><div><h3>Status Penguasaan</h3><p class="small muted">Kata "belum hafal" akan muncul lebih sering di kartu hafalan.</p></div>${ring(pct(hafal, semua.length), 56, 5, `<span style="font-size:12px">${pct(hafal, semua.length)}%</span>`)}</div>
+  const kams = urutKamoku(B.kosakata);
+  return head + `<div class="${tgCls('kosa')}">${togBar('kosa')}<div class="card mt3"><div class="row-b"><div><h3>Status Penguasaan</h3><p class="small muted">Kata "belum hafal" akan muncul lebih sering di kartu hafalan.</p></div>${ring(pct(hafal, semua.length), 56, 5, `<span style="font-size:12px">${pct(hafal, semua.length)}%</span>`)}</div>
     <div class="grid g3 mt3" style="grid-template-columns:repeat(3,1fr);gap:8px"><div class="center" style="background:var(--c-s1);border-radius:10px;padding:8px"><div class="tiny" style="color:var(--c-red);font-weight:700">★ Penting</div><b>${pent}</b></div><div class="center" style="background:var(--c-s1);border-radius:10px;padding:8px"><div class="tiny" style="color:var(--c-bad);font-weight:700">↺ Belum</div><b>${belum}</b></div><div class="center" style="background:var(--c-s1);border-radius:10px;padding:8px"><div class="tiny" style="color:var(--c-ok);font-weight:700">✓ Hafal</div><b>${hafal}</b></div></div>
-    <button class="btn btn-primary btn-block mt3" data-act="modeHafalan">${ic('style')} Mode Hafalan (Kartu)</button></div>
-    <div class="row gap2 wrap"><div class="search f1" style="min-width:220px">${ic('search')}<input class="inp" id="qKosa" placeholder="Cari kanji, bacaan, atau arti…" value="${esc(S.ui.qKosa || '')}" aria-label="Cari kosakata"></div>
-      <select class="inp" style="max-width:260px;border-radius:999px" data-act="" id="kamKosa" aria-label="Filter 科目"><option value="">Semua 科目</option>${kams.map(k => `<option ${k === kam ? 'selected' : ''}>${esc(k)}</option>`).join('')}</select></div>
-    <div class="col gap2" id="listKosa">${kosaList(daftar)}</div>`;
+    <button class="btn btn-primary btn-block mt3" data-act="modeHafalan">${ic('style')} Mulai Flash Card</button></div>
+    <div class="row gap2 wrap mt3"><div class="search f1" style="min-width:220px">${ic('search')}<input class="inp" id="qKosa" placeholder="Cari kanji, bacaan, atau arti…" value="${esc(S.ui.qKosa || '')}" aria-label="Cari kosakata"></div>
+      <select class="inp" style="max-width:260px;border-radius:999px" data-act="" id="kamKosa" aria-label="Filter 科目"><option value="">Semua 科目</option>${kams.map(k => `<option value="${esc(k)}" ${k === kam ? 'selected' : ''}>${esc(k)}</option>`).join('')}</select></div>
+    <div class="col gap2 mt3" id="listKosa">${kosaGrup(daftar, kam)}</div></div>`;
 };
 const TIPE_IC = { materi: 'picture_as_pdf', gambar: 'image', kosakata: 'style', paket_soal: 'quiz', zoom: 'videocam' };
 const TIPE_LBL = { materi: 'Materi', gambar: 'Gambar', kosakata: 'Kosakata', paket_soal: 'Paket soal', zoom: 'Kelas Zoom' };
+/* Kartu materi, dikelompokkan per 科目 (12 科目 selalu tampil) */
+function matKartu(m) {
+  return `<div class="card hov tap list-card" data-act="bukaMateri" data-id="${esc(m.id)}" role="button" tabindex="0">
+      <div class="kbox ${m.selesai ? '' : 'navy'}">${ic(m.tipe === 'gambar' ? 'photo_library' : m.tipe === 'teks' ? 'article' : 'picture_as_pdf')}</div>
+      <div class="f1"><b style="display:block">${furi(m.judul)}</b><span class="tiny muted">${m.tipe === 'gambar' ? m.jumlah_gambar + ' gambar' : m.tipe === 'teks' ? 'Teks' : 'PDF · baca online'}</span></div>
+      ${m.selesai ? `<span class="chip ok">${ic('check')} Selesai</span>` : ic('chevron_right')}</div>`;
+}
+function matGrupHTML(kel, kosongLbl) {
+  const list = S.boot.materi.filter(m => m.kelompok === kel);
+  if (!list.length) return `<div class="card empty">${ic('folder_open')}<p>${kosongLbl}</p></div>`;
+  return urutKamoku(list).map(k => { const items = list.filter(m => m.kamoku === k); return `<div class="mat-grup mb4"><h3 class="jp mb2">${kanaHead(k)}</h3>${items.length ? `<div class="grid g3">${items.map(matKartu).join('')}</div>` : '<p class="tiny muted">Belum ada materi untuk 科目 ini.</p>'}</div>`; }).join('');
+}
 function kosaList(daftar) {
   const stt = S.boot.kosakata_status;
   return daftar.map(k => { const s = stt[k.id]; return `<div class="card list-card"><div class="kbox" style="border-radius:50%;${s === 'hafal' ? 'background:#DCFCE7;color:#15803D' : s === 'belum' ? 'background:#FFDAD6;color:var(--c-bad)' : ''}">${ic(s === 'hafal' ? 'done' : s === 'belum' ? 'replay' : 'fiber_new')}</div>
-    <div class="f1"><div class="row wrap"><span class="jp" style="font-size:19px;font-weight:700;line-height:2">${furi(k.jp)}</span>${k.penting ? '<span class="chip red">★ Prioritas</span>' : ''}</div><div class="small muted">${esc(k.arti)}</div>${k.cjp ? `<div class="tiny mt1 jp" style="line-height:2">${furi(k.cjp)}</div>` : ''}</div>
+    <div class="f1"><div class="row wrap"><span class="jp" style="font-size:19px;font-weight:700;line-height:2">${furi(k.jp)}</span>${k.penting ? '<span class="chip red">★ Prioritas</span>' : ''}</div><div class="small muted terj">${esc(k.arti)}</div>${k.cjp ? `<div class="tiny mt1 jp" style="line-height:2">${furi(k.cjp)}</div>` : ''}${k.cid ? `<div class="tiny muted terj">${esc(k.cid)}</div>` : ''}</div>
     <div class="col gap1" style="align-items:flex-end"><button class="btn-ico sm" data-act="lapor" data-tipe="kosakata" data-id="${esc(k.id)}" aria-label="Laporkan">${ic('flag')}</button></div></div>`; }).join('') || '<div class="card empty">Tidak ada kata yang cocok.</div>';
 }
+/* Daftar kosakata: satu 科目 jika difilter, selain itu dikelompokkan 12 科目 */
+function kosaGrup(daftar, kam) {
+  if (kam) return kosaList(daftar);
+  return urutKamoku(daftar).map(k => { const items = daftar.filter(x => x.kamoku === k); return `<div class="mat-grup mb3"><h3 class="jp mb2">${kanaHead(k)}</h3>${items.length ? `<div class="col gap2">${kosaList(items)}</div>` : '<p class="tiny muted">Belum ada kosakata untuk 科目 ini.</p>'}</div>`; }).join('');
+}
 AFTER['m/belajar'] = () => {
-  const q = $('#qKosa'); if (q) q.addEventListener('input', debounce(() => { S.ui.qKosa = q.value; const B = S.boot, kam = S.ui.kamoku || '', s = q.value.toLowerCase(); $('#listKosa').innerHTML = kosaList(B.kosakata.filter(k => (!kam || k.kamoku === kam) && (!s || (plainJP(k.jp) + k.jp + k.arti + plainJP(k.cjp)).toLowerCase().indexOf(s) > -1))); }, 200));
+  const q = $('#qKosa'); if (q) q.addEventListener('input', debounce(() => { S.ui.qKosa = q.value; const B = S.boot, kam = S.ui.kamoku || '', s = q.value.toLowerCase(); $('#listKosa').innerHTML = kosaGrup(B.kosakata.filter(k => (!kam || k.kamoku === kam) && (!s || (plainJP(k.jp) + k.jp + k.arti + plainJP(k.cjp)).toLowerCase().indexOf(s) > -1)), kam); }, 200));
   const k = $('#kamKosa'); if (k) k.addEventListener('change', () => { S.ui.kamoku = k.value; render(false); });
 };
 
@@ -953,7 +1047,7 @@ R['m/kartu'] = () => {
   if (!F) { setTimeout(() => go('m/belajar', { tab: 'kosakata' }, { replace: true }), 0); return ''; }
   const k = B.kosakata.find(x => x.id === F.deck[F.i]) || B.kosakata[0], s = B.kosakata_status[k.id];
   const semua = B.kosakata.filter(x => !F.kam || x.kamoku === F.kam), hafal = semua.filter(x => B.kosakata_status[x.id] === 'hafal').length;
-  return `<div style="max-width:620px;margin:0 auto;width:100%" class="col gap3">
+  return `<div style="max-width:620px;margin:0 auto;width:100%" class="col gap3 ${tgCls('kosa')}">${togBar('kosa')}
     <div class="row-b"><span class="chip pale">${esc(F.kam || 'Semua 科目')}</span><span class="small muted">${F.i + 1} dari ${F.deck.length} kartu · ${hafal}/${semua.length} hafal</span></div>
     <div class="bar"><i style="width:${pct(F.i + 1, F.deck.length)}%"></i></div>
     <div class="fc-wrap"><div class="fc ${F.flip ? 'flip' : ''}" id="fc" data-act="balik" role="button" aria-label="Balik kartu" tabindex="0">
@@ -961,10 +1055,10 @@ R['m/kartu'] = () => {
         <div class="kanji">${furi(k.jp)}</div>
         ${k.cjp ? `<div style="background:var(--c-s1);border-radius:12px;padding:10px 12px"><div class="tiny bold" style="color:var(--c-primary-2)">${ic('menu_book')} CONTOH KALIMAT</div><div class="jp mt1" style="font-size:15px;line-height:2.1">${furi(k.cjp)}</div></div>` : ''}
         <div class="center tiny muted mt3">${ic('touch_app')} Sentuh kartu untuk lihat arti</div></div>
-      <div class="face back"><div class="tiny bold" style="color:var(--c-primary-2);text-transform:uppercase">Arti bahasa Indonesia</div>
-        <div style="font-family:var(--f-head);font-size:24px;font-weight:700;color:var(--c-head)" class="mt1">${esc(k.arti)}</div>
+      <div class="face back"><div class="terj"><div class="tiny bold" style="color:var(--c-primary-2);text-transform:uppercase">Arti bahasa Indonesia</div>
+        <div style="font-family:var(--f-head);font-size:24px;font-weight:700;color:var(--c-head)" class="mt1">${esc(k.arti)}</div></div>
         <div class="jp mt3" style="font-size:20px;line-height:2.1">${furi(k.jp)}</div>
-        ${k.cid ? `<div class="mt3" style="background:var(--c-pale);border-radius:12px;padding:10px 12px"><div class="jp small" style="line-height:2">${furi(k.cjp)}</div><div class="small mt1">${esc(k.cid)}</div></div>` : ''}
+        ${k.cid ? `<div class="mt3 terj" style="background:var(--c-pale);border-radius:12px;padding:10px 12px"><div class="jp small" style="line-height:2">${furi(k.cjp)}</div><div class="small mt1">${esc(k.cid)}</div></div>` : ''}
         ${k.img ? `<img src="${esc(k.img)}" alt="" class="mt3" style="max-height:120px;object-fit:contain" loading="lazy">` : ''}
         <div class="center tiny muted" style="margin-top:auto">${ic('touch_app')} Sentuh untuk kembali</div></div>
     </div></div>
@@ -1179,68 +1273,105 @@ function soalHTML(q, o = {}) {
 function trikHTML(q) {
   const t = q.trik || {}, ks = parseKosa(q.kosakata);
   if (!t.kata_kunci && !t.rumus_cepat && !t.jembatan && !t.jebakan) return '';
-  const part = (cls, lbl, ico, txt) => txt ? `<div class="part"><span class="lb ${cls}">${ic(ico)} ${lbl}</span><p>${md(txt)}</p></div>` : '';
-  return `<section class="trik" aria-label="TRIK JITU"><div class="glow"></div>${stamp('sm')}
-    <div class="row" style="position:relative">${ic('lightbulb', 'fill')}<div><h3>TRIK JITU GOUKAKU</h3><div class="tiny" style="color:var(--c-tfix)">Bongkar pola ujian Kaigo Fukushishi</div></div></div>
-    ${part('k', '1. KATA KUNCI (キーワード)', 'key', t.kata_kunci)}${part('r', '2. RUMUS CEPAT', 'bolt', t.rumus_cepat)}${part('j', '3. JEMBATAN INGATAN', 'psychology', t.jembatan)}${part('a', '4. AWAS JEBAKAN! (注意点)', 'warning', t.jebakan)}
-    ${ks.length ? `<div class="mt3" style="position:relative"><div class="tiny bold" style="color:var(--c-tfix);letter-spacing:.06em">KOSAKATA PENTING</div>${ks.map(k => `<span class="vchip"><b>${furi(k.jp)}</b>${k.arti ? ' ' + esc(k.arti) : ''}</span>`).join('')}</div>` : ''}</section>`;
+  const part = (cls, lbl, ico, txt, id) => txt ? `<div class="part"><span class="lb ${cls}">${ic(ico)} ${lbl}</span><p>${md(txt)}</p>${id ? `<p class="terj trik-id">${md(id)}</p>` : ''}</div>` : '';
+  return `<section class="trik ${tgCls('soal')}" aria-label="TRIK JITU"><div class="glow"></div>${stamp('sm')}
+    <div class="row" style="position:relative">${ic('lightbulb', 'fill')}<div><h3>TRIK JITU GOUKAKU <span class="trik-jp">合格への近道</span></h3><div class="tiny" style="color:var(--c-tfix)">Bongkar pola ujian Kaigo Fukushishi</div></div></div>
+    <div class="mt2" style="position:relative">${togBar('soal')}</div>
+    ${part('k', 'KATA KUNCI · キーワード', 'key', t.kata_kunci, t.kata_kunci_id)}${part('r', 'RUMUS CEPAT · 答えを出す近道', 'bolt', t.rumus_cepat, t.rumus_cepat_id)}${part('j', 'JEMBATAN INGATAN · 覚え方', 'psychology', t.jembatan, t.jembatan_id)}${part('a', 'AWAS JEBAKAN · 注意', 'warning', t.jebakan, t.jebakan_id)}
+    ${ks.length ? `<div class="mt3" style="position:relative"><div class="tiny bold" style="color:var(--c-tfix);letter-spacing:.06em">KOSAKATA PENTING</div>${ks.map(k => `<span class="vchip"><b>${furi(k.jp)}</b>${k.arti ? ' <span class="terj">' + esc(k.arti) + '</span>' : ''}</span>`).join('')}</div>` : ''}</section>`;
 }
 ACT.terjemah = () => {
   if (S.route === 'coba') { S.coba.terjemah = !S.coba.terjemah; render(false); return; }
-  if (S.quiz) { S.quiz.terjemah = !S.quiz.terjemah; LS.set('gp_terjemah', S.quiz.terjemah); render(false); }
+  const t = tgGet('soal'); t.terj = !t.terj; LS.set('gp_tg_soal', t); render(false);
 };
 
-/* ---------- Daftar paket soal ---------- */
+/* ---------- BANK SOAL DAN TRIK JITU (halaman Soal) ---------- */
+const SESI_MENIT = { '午前': 105, '午後': 115 };
 R['m/soal'] = () => {
-  const B = S.boot; S.ui.title = 'Soal';
+  const B = S.boot; S.ui.title = 'BANK SOAL DAN TRIK JITU';
   const grp = [['過去問', '過去問 · Ujian Resmi', 'history_edu', '第33〜38回 + pembahasan lengkap'], ['練習', '練習 · Latihan', 'psychology', 'Latihan buatan Goukaku Pedia ID'], ['模擬試験', '模擬試験 · Simulasi', 'timer', 'Bertimer seperti hari ujian']];
-  const kams = [...new Set(B.kamoku)], aktif = LS.get('gp_quiz');
-  return `<div class="tabs"><button class="tab on">${ic('quiz')} 13 Paket Soal</button><button class="tab" data-go="m/riwayat">${ic('analytics')} Riwayat Nilai</button></div>
+  const kams = urutKamoku(B.kamoku), aktif = LS.get('gp_quiz');
+  return `<div class="${tgCls('soal')}"><div class="tabs"><button class="tab on">${ic('quiz')} BANK SOAL DAN TRIK JITU</button><button class="tab" data-go="m/riwayat">${ic('analytics')} Riwayat Nilai</button></div>
     ${aktif && !aktif.selesai ? `<div class="card row" style="border-left:4px solid var(--c-amber)">${ic('pending_actions')}<div class="f1"><b class="small">Lanjutkan: ${furi(aktif.label)}</b><div class="tiny muted">${Object.keys(aktif.jawab).length}/${aktif.soal.length} dijawab${aktif.mode === 'ujian' ? ' · timer tetap berjalan' : ''}</div></div><button class="btn btn-primary btn-sm" data-act="lanjutKuis">Lanjut</button></div>` : ''}
+    ${togBar('soal')}
     <div class="card col gap3"><div class="row-b wrap"><b>Latihan cepat</b><span class="tiny muted">Pembahasan langsung setelah menjawab</span></div>
-      <div class="row wrap gap2"><select class="inp f1" id="selKam" style="min-width:200px;border-radius:999px" aria-label="Pilih 科目"><option value="">Acak dari semua 科目</option>${kams.map(k => `<option>${esc(k)}</option>`).join('')}</select>
+      <div class="row wrap gap2"><select class="inp f1" id="selKam" style="min-width:200px;border-radius:999px" aria-label="Pilih 科目"><option value="">Acak dari semua 科目</option>${kams.map(k => `<option value="${esc(k)}">${esc(k)}</option>`).join('')}</select>
       <button class="btn btn-primary" data-act="acak">${ic('shuffle')} Mulai 20 soal</button>
       <button class="btn btn-light" data-act="ulangSalah" ${B.salah.length ? '' : 'disabled'}>${ic('replay')} Ulangi yang salah (${B.salah.length})</button></div></div>
     ${grp.map(g => { const l = B.paket_soal.filter(p => p.jenis === g[0]); return l.length ? `<section><div class="row-b mb2"><h3 class="row jp">${ic(g[2])} ${g[1]}</h3><span class="tiny muted">${l.length} paket · ${g[3]}</span></div>
-      <div class="grid g3">${l.map(p => paketKartu(p, aktif)).join('')}</div></section>` : ''; }).join('')}`;
+      <div class="grid g3">${l.map(p => paketKartu(p, aktif)).join('')}</div></section>` : ''; }).join('')}
+    ${trikSiapUnduh()}</div>`;
 };
+/* Satu paket: tiap sesi (午前 / 午後) punya tombol Latihan dan Bertimer dengan menit yang bisa diatur */
 function paketKartu(p, aktif) {
   const sedang = aktif && !aktif.selesai && aktif.paket_id === p.id, st = sedang ? ['sedang', 'amber'] : p.dikerjakan ? ['selesai', 'ok'] : ['belum', 'ghost'];
-  const mogi = p.jenis === '模擬試験';
+  const mogi = p.jenis === '模擬試験', dis = p.terbuka ? '' : 'disabled', js = p.jumlah_sesi || {};
+  const sesi = ['午前', '午後'].filter(s => js[s]).concat(Object.keys(js).filter(s => s !== '午前' && s !== '午後' && s !== 'semua' && js[s]));
+  const baris = sesi.length ? sesi.map(s => sesiBaris(p, s, js[s], dis)).join('') : sesiBaris(p, '', p.jumlah, dis);
   return `<div class="card hov col gap2"><div class="row-b"><span class="chip ${mogi ? 'red' : p.jenis === '過去問' ? '' : 'pale'} jp">${esc(p.jenis)}</span><span class="chip ${st[1]}">${st[0]}</span></div>
     <h3 class="jp">${furi(p.nama)}</h3><p class="small muted">${esc(p.deskripsi || '')}</p>
-    <div class="row wrap tiny muted gap3"><span class="row gap1">${ic('quiz')} ${p.jumlah} soal</span>${mogi || p.durasi ? `<span class="row gap1">${ic('timer')} ${p.durasi} menit</span>` : ''}${p.terbaik !== null ? `<span class="row gap1" style="color:var(--c-ok);font-weight:700">${ic('emoji_events')} ${p.terbaik}%</span>` : ''}</div>
+    <div class="row wrap tiny muted gap3"><span class="row gap1">${ic('quiz')} ${p.jumlah} soal</span>${p.terbaik !== null ? `<span class="row gap1" style="color:var(--c-ok);font-weight:700">${ic('emoji_events')} ${p.terbaik}%</span>` : ''}</div>
     ${!p.terbuka ? `<div class="tiny" style="color:var(--c-red);font-weight:700">${toDate(p.buka) && toDate(p.buka) > Date.now() ? 'Dibuka ' + fTgl(p.buka) : 'Sudah ditutup'}</div>` : mogi && p.tutup ? `<div class="tiny muted">Ditutup ${fTgl(p.tutup)} · pembahasan ${p.pembahasan === 'setelah_tutup' ? 'setelah ditutup' : 'setelah selesai'}</div>` : ''}
-    <div class="row gap2 mt1" style="margin-top:auto">${mogi ? `<button class="btn btn-red f1" data-act="mulai" data-id="${esc(p.id)}" data-mode="ujian" ${p.terbuka ? '' : 'disabled'}>${ic('timer')} Mulai Simulasi</button>`
-      : p.jenis === '過去問' ? `<button class="btn btn-primary f1 btn-sm" data-act="mulai" data-id="${esc(p.id)}" data-mode="latihan">Latihan</button><button class="btn btn-light f1 btn-sm" data-act="mulai" data-id="${esc(p.id)}" data-mode="ujian">${ic('timer')} Bertimer</button>`
-        : `<button class="btn btn-primary f1" data-act="mulai" data-id="${esc(p.id)}" data-mode="latihan">${p.dikerjakan ? 'Ulangi' : 'Mulai Latihan'}</button>`}</div></div>`;
+    <div class="col gap2 mt1" style="margin-top:auto">${baris}</div></div>`;
 }
+function sesiBaris(p, s, n, dis) {
+  const menit = LS.get('gp_menit_' + (s || 'semua')) || SESI_MENIT[s] || p.durasi || 90;
+  return `<div class="sesi-row col gap1" style="border-top:1px solid var(--c-line);padding-top:8px">
+    <div class="row-b wrap gap2"><b class="jp">${s ? 'Sesi ' + s : 'Semua soal'}</b><span class="tiny muted">${n} soal</span></div>
+    <div class="row wrap gap2"><button class="btn btn-light btn-sm" data-act="mulai" data-id="${esc(p.id)}" data-mode="latihan" data-sesi="${esc(s)}" ${dis}>${ic('edit_note')} Latihan</button>
+      <span class="row gap1 tiny muted"><input class="inp" type="number" min="5" max="300" value="${menit}" aria-label="Timer dalam menit" style="width:78px;padding:6px 8px">menit</span>
+      <button class="btn btn-red btn-sm" data-act="mulai" data-id="${esc(p.id)}" data-mode="ujian" data-sesi="${esc(s)}" data-timer="1" ${dis}>${ic('timer')} Bertimer</button></div></div>`;
+}
+/* TRIK JITU SIAP DOWNLOAD: file yang diunggah admin, bisa diunduh member */
+function trikSiapUnduh() {
+  const B = S.boot, bagian = [['ringkasan_trik', 'RINGKASAN TRIK JITU', 'lightbulb'], ['semua_soal', 'SEMUA SOAL', 'library_books']];
+  return `<section class="col gap2 mt4"><div class="row-b"><h3 class="row">${ic('download')} TRIK JITU SIAP DOWNLOAD</h3></div>
+    <div class="grid g2">${bagian.map(([k, lbl, ico]) => { const l = B.materi.filter(m => m.kelompok === k); return `<div class="card col gap2"><div class="row gap2">${ic(ico, 'fill')}<b>${lbl}</b><span class="tiny muted" style="margin-left:auto">${l.length} file</span></div>
+      ${l.map(m => `<div class="card hov tap list-card" role="button" tabindex="0" data-act="unduhMateri" data-id="${esc(m.id)}"><div class="kbox navy">${ic('picture_as_pdf')}</div><div class="f1"><b style="display:block">${furi(m.judul)}</b><span class="tiny muted">PDF · unduh</span></div>${ic('download')}</div>`).join('') || '<p class="tiny muted">Belum ada file. Admin akan mengunggahnya di sini.</p>'}</div>`; }).join('')}</div></section>`;
+}
+ACT.unduhMateri = async el => {
+  const m = S.boot.materi.find(x => x.id === el.dataset.id); if (!m) return toast('File tidak ditemukan', 'warn');
+  try {
+    toast('Menyiapkan file…');
+    const d = await API.call('m.materi.buka', { id: m.id }, { timeout: 120000, silent: true });
+    if (d.tipe !== 'pdf') return toast('File ini tidak bisa diunduh.', 'warn');
+    const url = URL.createObjectURL(new Blob([b64ToBytes(d.b64)], { type: 'application/pdf' }));
+    const a = document.createElement('a'); a.href = url; a.download = (plainJP(m.judul) || 'materi').replace(/[\\/:*?"<>|]+/g, '-') + '.pdf';
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 10000);
+  } catch (e) { toast(e.message, 'err'); }
+};
 
 /* ---------- Ambil soal (cache memori + localStorage untuk mode latihan) ---------- */
 const SOAL_MEM = {};
-async function ambilSoal(paketId, mode, silent) {
-  const key = 'gp_soal_' + paketId + '_' + mode;
+async function ambilSoal(paketId, mode, silent, sesi = '') {
+  const key = 'gp_soal_' + paketId + '_' + mode + (sesi ? '_' + sesi : '');
   if (SOAL_MEM[key]) return SOAL_MEM[key];
   const c = LS.get(key);
   if (c && Date.now() - c.t < 6 * 3600000) { SOAL_MEM[key] = c.d; return c.d; }
-  const d = await API.call('m.soal.ambil', { paket_id: paketId, mode }, { silent });
+  const d = await API.call('m.soal.ambil', { paket_id: paketId, mode, sesi }, { silent });
   SOAL_MEM[key] = d; if (mode === 'latihan') LS.set(key, { t: Date.now(), d });
   return d;
 }
-ACT.mulai = el => mulaiPaket(el.dataset.id, el.dataset.mode);
-async function mulaiPaket(id, mode) {
+ACT.mulai = el => {
+  const row = el.closest('.sesi-row'), inp = row && row.querySelector('input');
+  let menit = 0;
+  if (el.dataset.timer && inp) { menit = Math.max(5, Math.min(300, num(inp.value) || 90)); LS.set('gp_menit_' + (el.dataset.sesi || 'semua'), menit); }
+  mulaiPaket(el.dataset.id, el.dataset.mode, el.dataset.sesi || '', menit);
+};
+async function mulaiPaket(id, mode, sesi = '', menit = 0) {
   const B = S.boot, p = B.paket_soal.find(x => x.id === id); if (!p) return;
-  const aktif = LS.get('gp_quiz');
-  if (aktif && !aktif.selesai && aktif.paket_id === id && aktif.mode === mode) { S.quiz = aktif; return go('m/kuis'); }
+  const aktif = LS.get('gp_quiz'), label = p.nama + (sesi ? ' · Sesi ' + sesi : '');
+  if (aktif && !aktif.selesai && aktif.paket_id === id && (aktif.sesi || '') === sesi && aktif.mode === mode) { S.quiz = aktif; return go('m/kuis'); }
   if (aktif && !aktif.selesai && aktif.mode === 'ujian' && !await confirmBox(`Ada ujian lain yang belum selesai (${esc(plainJP(aktif.label))}). Tinggalkan dan mulai paket ini?`, 'Mulai baru', true)) return;
-  if (mode === 'ujian' && !await confirmBox(`<b>${furi(p.nama)}</b><br>${p.jumlah} soal · ${p.durasi} menit.<br><br>Timer berjalan seperti ujian asli. Jawaban tersimpan otomatis di HP dan terkirim saat selesai / waktu habis.`, 'Mulai Ujian')) return;
+  if (mode === 'ujian' && !await confirmBox(`<b>${furi(label)}</b><br>${menit || p.durasi} menit.<br><br>Timer berjalan seperti ujian asli. Jawaban tersimpan otomatis di HP dan terkirim saat selesai / waktu habis.`, 'Mulai Ujian')) return;
   try {
-    const d = await ambilSoal(id, mode);
-    if (!d.soal.length) return toast('Paket ini belum berisi soal.', 'warn');
+    const d = await ambilSoal(id, mode, false, sesi);
+    const soal = sesi ? d.soal.filter(q => q.sesi === sesi) : d.soal;
+    if (!soal.length) return toast('Sesi ini belum berisi soal.', 'warn');
     const now = Date.now(), draft = d.draft;
-    S.quiz = { paket_id: id, label: p.nama, jenis: p.jenis, mode, soal: d.soal, idx: 0, jawab: draft ? draft.jawaban || {} : {}, ragu: draft ? draft.ragu || {} : {}, cek: {},
-      terjemah: mode === 'ujian' ? false : !!LS.get('gp_terjemah'), mulai: new Date(now).toISOString(),
-      deadline: mode === 'ujian' ? now + (draft && draft.sisa ? draft.sisa * 1000 : (d.paket.durasi || 120) * 60000) : 0 };
+    S.quiz = { paket_id: id, sesi, label, jenis: p.jenis, mode, soal, idx: 0, jawab: draft ? draft.jawaban || {} : {}, ragu: draft ? draft.ragu || {} : {}, cek: {},
+      mulai: new Date(now).toISOString(),
+      deadline: mode === 'ujian' ? now + (draft && draft.sisa ? draft.sisa * 1000 : (menit || d.paket.durasi || 120) * 60000) : 0 };
     simpanKuis(); catatAktivitas(); go('m/kuis');
   } catch (e) { toast(e.message, 'err'); }
 }
@@ -1266,7 +1397,7 @@ R['m/kuis'] = () => {
   S.ui.title = plainJP(Q.label);
   const q = Q.soal[Q.idx], n = Q.soal.length, ujian = Q.mode === 'ujian', review = Q.mode === 'review';
   const sudah = review || (!ujian && Q.cek[q.id]);
-  const terj = ujian ? Q.terjemah : (Q.terjemah || sudah);
+  const terj = tgGet('soal').terj;
   const dijawab = Object.keys(Q.jawab).length;
   const nav = `<div class="qnav">${Q.soal.map((s, i) => { const j = Q.jawab[s.id]; let c = ''; if (review || (!ujian && Q.cek[s.id])) c = j === undefined ? '' : String(j) === String(s.kunci) ? 'ok' : 'bad'; else if (j !== undefined) c = 'ans'; return `<button class="${c} ${i === Q.idx ? 'cur' : ''} ${Q.ragu[s.id] ? 'ragu' : ''}" data-act="keSoal" data-i="${i}" aria-label="Soal ${i + 1}">${i + 1}</button>`; }).join('')}</div>`;
   const top = `<div class="q-top"><div class="card row-b wrap" style="padding:10px 14px"><div class="row wrap gap2"><span class="chip jp">${esc(Q.jenis)}</span><b class="small">Soal ${Q.idx + 1} dari ${n}</b>${ujian ? `<span class="tiny muted">${dijawab} dijawab</span>` : ''}</div>
@@ -1274,10 +1405,10 @@ R['m/kuis'] = () => {
   const side = `<div class="col gap3">${sudah ? trikHTML(q) || '<div class="card small muted">TRIK JITU untuk soal ini belum tersedia.</div>' : ''}
     <div class="card col gap3 ${sudah ? 'only-d' : ''}"><div class="row-b"><b class="small">Navigasi Cepat (1–${n})</b>${ujian ? '' : `<span class="tiny muted">${Object.keys(Q.cek).length}/${n} dibahas</span>`}</div>${nav}
       ${review ? '' : `<button class="btn ${ujian ? 'btn-red' : 'btn-primary'} btn-block" data-act="selesaiKuis">${ic('flag')} ${ujian ? 'Selesai & Kumpulkan' : 'Selesai Latihan'}</button>`}</div></div>`;
-  return `${top}<div class="qwrap"><div class="col gap3">${soalHTML(q, { pilih: Q.jawab[q.id], tampilKunci: sudah, terjemah: terj, nomor: Q.idx + 1 })}</div>${side}</div>
+  return `<div class="${tgCls('soal')}">${togBar('soal')}${top}<div class="qwrap"><div class="col gap3">${soalHTML(q, { pilih: Q.jawab[q.id], tampilKunci: sudah, terjemah: terj, nomor: Q.idx + 1 })}</div>${side}</div>
     <div class="qbar"><button class="btn btn-light" data-act="qNav" data-d="-1" ${Q.idx === 0 ? 'disabled' : ''}>${ic('arrow_back')}<span class="only-d">Sebelumnya</span></button>
       <button class="btn btn-light only-m" data-act="daftarSoal">${ic('grid_view')} Daftar Soal</button>
-      ${Q.idx < n - 1 ? `<button class="btn btn-primary" data-act="qNav" data-d="1"><span>Berikutnya</span>${ic('arrow_forward')}</button>` : review ? `<button class="btn btn-primary" data-act="back">Selesai ${ic('check')}</button>` : `<button class="btn ${ujian ? 'btn-red' : 'btn-primary'}" data-act="selesaiKuis">Selesai ${ic('flag')}</button>`}</div>`;
+      ${Q.idx < n - 1 ? `<button class="btn btn-primary" data-act="qNav" data-d="1"><span>Berikutnya</span>${ic('arrow_forward')}</button>` : review ? `<button class="btn btn-primary" data-act="back">Selesai ${ic('check')}</button>` : `<button class="btn ${ujian ? 'btn-red' : 'btn-primary'}" data-act="selesaiKuis">Selesai ${ic('flag')}</button>`}</div></div>`;
 };
 AFTER['m/kuis'] = () => {
   const Q = S.quiz; clearInterval(_qTimer); clearTimeout(_qSave);
@@ -1290,7 +1421,7 @@ AFTER['m/kuis'] = () => {
   };
   upd(); _qTimer = setInterval(upd, 1000);
   // simpan sementara ke server tiap ±3 menit (jeda acak agar tidak serentak)
-  const auto = () => { _qSave = setTimeout(() => { if (S.quiz && S.quiz.mode === 'ujian' && !S.quiz.selesai) { API.call('m.ujian.simpan', { paket_id: Q.paket_id, jawaban: Q.jawab, ragu: Q.ragu, sisa: Math.floor((Q.deadline - Date.now()) / 1000) }, { silent: true }).catch(() => { }); auto(); } }, 180000 + Math.random() * 30000); };
+  const auto = () => { _qSave = setTimeout(() => { if (S.quiz && S.quiz.mode === 'ujian' && !S.quiz.selesai) { API.call('m.ujian.simpan', { paket_id: Q.paket_id, sesi: Q.sesi || '', jawaban: Q.jawab, ragu: Q.ragu, sisa: Math.floor((Q.deadline - Date.now()) / 1000) }, { silent: true }).catch(() => { }); auto(); } }, 180000 + Math.random() * 30000); };
   auto();
 };
 ACT.jawab = el => {
@@ -1315,7 +1446,7 @@ async function selesaiKuis(paksa) {
   const belum = Q.soal.filter(s => Q.jawab[s.id] === undefined).length, ragu = Object.keys(Q.ragu).length;
   if (!paksa && !await confirmBox(`${belum ? `Masih ada <b>${belum}</b> soal belum dijawab. ` : 'Semua soal sudah dijawab. '}${ragu ? `Ada <b>${ragu}</b> soal ditandai ragu-ragu. ` : ''}Kumpulkan sekarang?`, 'Kumpulkan')) return;
   Q.selesai = true; clearInterval(_qTimer); clearTimeout(_qSave);
-  const payload = { paket_id: Q.paket_id, jawaban: Q.jawab, mulai: Q.mulai, mode: Q.mode, jenis: Q.jenis === '模擬試験' ? '模擬試験' : 'latihan', label: Q.tag || '', ids: Q.paket_id ? [] : Q.soal.map(s => s.id) };
+  const payload = { paket_id: Q.paket_id, sesi: Q.sesi || '', jawaban: Q.jawab, mulai: Q.mulai, mode: Q.mode, jenis: Q.jenis === '模擬試験' ? '模擬試験' : 'latihan', label: Q.tag || '', ids: (Q.paket_id && !Q.sesi) ? [] : Q.soal.map(s => s.id) };
   LS.del('gp_quiz');
   // hasil lokal (instan) — server menghitung ulang dari kunci asli
   const lokal = hitungLokal(Q);
@@ -1409,6 +1540,7 @@ ACT.detailHasil = async el => {
 const STATUS = [['aktif', 'Aktif'], ['nonaktif', 'Nonaktif']];
 const YN = 'yn';
 const F = (k, l, t = 'text', x = {}) => Object.assign({ k, l, t }, x);
+const KELOMPOK_OPT = [['terjemahan', 'Materi terjemahan (bahasa bayi)'], ['ilustrasi', 'Belajar dengan ilustrasi bergambar'], ['ringkasan_trik', 'Ringkasan trik jitu (siap unduh)'], ['semua_soal', 'Semua soal (siap unduh)']];
 const MODS = {
   hero: { sheet: 'Hero', judul: 'Hero / Gambar Promosi', ico: 'view_carousel', urut: true, cols: [['judul', 'Judul'], ['cta_teks', 'Tombol'], ['urutan', '#'], ['status', 'Status']],
     f: [F('judul', 'Judul', 'furi', { req: 1 }), F('subjudul', 'Subjudul', 'textarea'), F('gambar_url', 'Gambar promosi', 'img', { folder: 'publik' }), F('cta_teks', 'Teks tombol'), F('cta_link', 'Link tombol', 'text', { help: '#coba, #paket, atau https://…' }), F('urutan', 'Urutan', 'num'), F('status', 'Status', 'sel', { opt: STATUS })] },
@@ -1428,8 +1560,8 @@ const MODS = {
     f: [F('pertanyaan', 'Pertanyaan', 'text', { req: 1 }), F('jawaban', 'Jawaban', 'textarea', { req: 1 }), F('urutan', 'Urutan', 'num'), F('status', 'Status', 'sel', { opt: STATUS })] },
   alur: { sheet: 'AlurBelajar', judul: 'Alur Belajar', ico: 'route', urut: true, cols: [['langkah_ke', '#'], ['judul', 'Judul'], ['tipe_item', 'Tipe'], ['bobot', 'Bobot'], ['wajib', 'Wajib']], tools: [['alurPratinjau', 'insights', 'Pratinjau target']],
     f: [F('langkah_ke', 'Langkah ke-', 'num', { req: 1 }), F('judul', 'Judul', 'furi', { req: 1 }), F('deskripsi', 'Deskripsi', 'textarea'), F('tipe_item', 'Tipe item', 'sel', { opt: [['materi', 'Materi PDF'], ['gambar', 'Materi gambar'], ['kosakata', 'Kosakata'], ['paket_soal', 'Paket soal'], ['zoom', 'Kelas Zoom']], ubah: 1 }), F('item_id', 'Item yang ditautkan', 'itemAlur', { req: 1 }), F('bobot', 'Bobot (perkiraan lama belajar)', 'num', { help: 'default 1' }), F('wajib', 'Wajib', YN), F('urutan', 'Urutan', 'num')] },
-  materi: { sheet: 'Materi', judul: 'Materi & Gambar', ico: 'picture_as_pdf', urut: true, filter: 'kamoku', cols: [['kamoku', '科目'], ['judul', 'Judul'], ['tipe', 'Tipe'], ['gratis', 'Gratis'], ['status', 'Status']],
-    f: [F('kamoku', '科目', 'kamoku', { req: 1 }), F('judul', 'Judul', 'furi', { req: 1 }), F('tipe', 'Tipe', 'sel', { opt: [['pdf', 'PDF'], ['gambar', 'Galeri gambar'], ['teks', 'Teks']], ubah: 1 }),
+  materi: { sheet: 'Materi', judul: 'Materi & Gambar', ico: 'picture_as_pdf', urut: true, filter: 'kamoku', cols: [['kelompok', 'Tampil di', v => (KELOMPOK_OPT.find(x => x[0] === v) || [0, v || '—'])[1]], ['kamoku', '科目'], ['judul', 'Judul'], ['tipe', 'Tipe'], ['gratis', 'Gratis'], ['status', 'Status']],
+    f: [F('kelompok', 'Tampil di (menu)', 'sel', { opt: KELOMPOK_OPT, req: 1, help: 'Pilih bagian member tempat file ini muncul' }), F('kamoku', '科目', 'kamoku', { help: 'Wajib untuk materi terjemahan & ilustrasi. Kosongkan untuk ringkasan trik / semua soal.' }), F('judul', 'Judul', 'furi', { req: 1 }), F('tipe', 'Tipe', 'sel', { opt: [['pdf', 'PDF'], ['gambar', 'Galeri gambar'], ['teks', 'Teks']], ubah: 1 }),
       F('file_id', 'File PDF (privat)', 'pdf', { show: r => (r.tipe || 'pdf') === 'pdf' }), F('daftar_gambar', 'Gambar galeri (privat)', 'imgs', { show: r => r.tipe === 'gambar' }), F('keterangan_gambar', 'Keterangan (1 baris per gambar)', 'textarea', { show: r => r.tipe === 'gambar' }),
       F('isi_teks', 'Isi teks', 'textarea', { show: r => r.tipe === 'teks' }), F('paket_akses', 'Akses paket', 'akses'), F('gratis', 'Gratis (tanpa paket)', YN), F('urutan', 'Urutan', 'num'), F('status', 'Status', 'sel', { opt: STATUS })] },
   kosakata: { sheet: 'Kosakata', judul: 'Kosakata', ico: 'style', urut: true, imp: 1, filter: 'kamoku', cols: [['kata_jp', 'Kata', v => furi(v)], ['arti_id', 'Arti'], ['kamoku', '科目'], ['penting', '★']],
@@ -1443,7 +1575,7 @@ const MODS = {
       F('soal_jp', 'Soal JP (｜漢字《かんじ》)', 'furi', { req: 1, full: 1 }), F('soal_id', 'Terjemahan soal', 'textarea'), F('gambar_url', 'Gambar soal', 'img', { folder: 'soal' }),
       ...[1, 2, 3, 4, 5].map(i => [F('pilihan_' + i, 'Pilihan ' + i + ' (JP)', 'furi', { rows: 2 }), F('pilihan_' + i + '_id', 'Pilihan ' + i + ' (ID)')]).flat(),
       F('kunci', 'Kunci jawaban', 'sel', { opt: [1, 2, 3, 4, 5].map(x => [x, x]), req: 1 }), F('analisa', 'Analisa ○× (1 baris per pilihan: no|○/×|teks JP|teks ID)', 'textarea', { rows: 6 }),
-      F('trik_kata_kunci', 'TRIK 1 · KATA KUNCI', 'textarea', { rows: 2 }), F('trik_rumus_cepat', 'TRIK 2 · RUMUS CEPAT', 'textarea', { rows: 2 }), F('trik_jembatan_ingatan', 'TRIK 3 · JEMBATAN INGATAN', 'textarea', { rows: 2 }), F('trik_awas_jebakan', 'TRIK 4 · AWAS JEBAKAN', 'textarea', { rows: 2 }),
+      F('trik_kata_kunci', 'TRIK 1 · KATA KUNCI (JP)', 'textarea', { rows: 2 }), F('trik_kata_kunci_id', 'TRIK 1 · KATA KUNCI (ID)', 'textarea', { rows: 2 }), F('trik_rumus_cepat', 'TRIK 2 · RUMUS CEPAT (JP)', 'textarea', { rows: 2 }), F('trik_rumus_cepat_id', 'TRIK 2 · RUMUS CEPAT (ID)', 'textarea', { rows: 2 }), F('trik_jembatan_ingatan', 'TRIK 3 · JEMBATAN INGATAN (JP)', 'textarea', { rows: 2 }), F('trik_jembatan_ingatan_id', 'TRIK 3 · JEMBATAN INGATAN (ID)', 'textarea', { rows: 2 }), F('trik_awas_jebakan', 'TRIK 4 · AWAS JEBAKAN (JP)', 'textarea', { rows: 2 }), F('trik_awas_jebakan_id', 'TRIK 4 · AWAS JEBAKAN (ID)', 'textarea', { rows: 2 }),
       F('kosakata', 'Kosakata penting (漢字（かな）=arti; …)', 'textarea', { rows: 2 }), F('gratis', 'Soal gratis (Coba Gratis)', YN), F('status', 'Status', 'sel', { opt: STATUS })] },
   zoom: { sheet: 'KelasZoom', judul: 'Kelas Zoom', ico: 'videocam', cols: [['judul', 'Judul'], ['mulai', 'Mulai', fWaktu], ['rekaman_youtube_id', 'Rekaman', v => v ? '✓' : '–'], ['status', 'Status']],
     f: [F('judul', 'Judul', 'text', { req: 1 }), F('kamoku', '科目', 'kamoku'), F('pengajar', 'Pengajar'), F('mulai', 'Mulai', 'dt', { req: 1 }), F('durasi_menit', 'Durasi (menit)', 'num'), F('link_zoom', 'Link Zoom', 'text', { req: 1 }), F('meeting_id', 'Meeting ID'), F('passcode', 'Passcode'), F('paket_akses', 'Akses paket', 'akses'),
@@ -1619,10 +1751,11 @@ document.addEventListener('change', async e => {
         if (file.type === 'application/pdf') { if (file.size > 20 * 1024 * 1024) throw new Error('PDF maksimal 20 MB. Pecah per bab.'); up = { b64: await fileB64(file), mime: file.type }; }
         else up = await kompresGambar(file);
         const r = await API.call('a.upload', { nama: file.name, mime: up.mime, b64: up.b64, folder: t.dataset.folder }, { timeout: 120000 });
-        const inp = $(`#ovl [name="${t.dataset.up}"]`);
+        const ruang = $('#ovl') || document; // di dalam modal, atau di halaman Pengaturan
+        const inp = $(`[name="${t.dataset.up}"]`, ruang);
         if (t.dataset.multiUp) inp.value = (inp.value ? inp.value.replace(/,\s*$/, '') + ',' : '') + r.id;
         else inp.value = r.url || r.id;
-        const pv = $(`#ovl [data-pv="${t.dataset.up}"]`); if (pv && r.url) { pv.src = 'data:' + up.mime + ';base64,' + up.b64; pv.classList.remove('hide'); }
+        const pv = $(`[data-pv="${t.dataset.up}"]`, ruang); if (pv && r.url) { pv.src = 'data:' + up.mime + ';base64,' + up.b64; pv.classList.remove('hide'); }
       }
       toast('Unggahan berhasil ✓');
     } catch (err) { toast(err.message, 'err'); } finally { lbl.classList.remove('loading'); t.value = ''; }
@@ -1685,6 +1818,8 @@ ACT.tplBank = () => {
       '3|×|家族任せは不適切。|Salah: tidak boleh diserahkan semua ke keluarga.', '4|×|医療行為には制限がある。|Salah: tindakan medis dibatasi.'].join('\n'),
     trik_kata_kunci: '自立支援 = jawaban aman', trik_rumus_cepat: 'Pilihan yang menghormati keinginan & kemandirian pengguna hampir selalu BENAR.',
     trik_jembatan_ingatan: 'JIRITSU = mandiri, biarkan pengguna melakukan sendiri yang ia bisa.', trik_awas_jebakan: 'Kata すべて / 必ず biasanya SALAH.',
+    trik_kata_kunci_id: 'Dukungan kemandirian = jawaban aman', trik_rumus_cepat_id: 'Pilihan yang menghormati keinginan & kemandirian pengguna hampir selalu BENAR.',
+    trik_jembatan_ingatan_id: 'JIRITSU = mandiri, biarkan pengguna melakukan sendiri yang ia bisa.', trik_awas_jebakan_id: 'Kata すべて / 必ず biasanya SALAH.',
     kosakata: '自立支援（じりつしえん）=dukungan kemandirian; 意向（いこう）=keinginan', gratis: 'tidak', status: 'aktif'
   };
   const kolom = (S.adm && S.adm.schema && S.adm.schema.BankSoal || Object.keys(contoh)).filter(k => k !== 'id');
@@ -1965,7 +2100,7 @@ R['a/log'] = () => {
 R['a/pengaturan'] = () => {
   S.ui.title = 'Pengaturan'; if (!isSU()) return '<div class="card empty">Khusus Superadmin.</div>';
   const d = adData('', 'a.setting.get', {}, '__setting'); if (!d || !d.setting) return skelTbl();
-  const s = d.setting, inp = (k, l, t = 'text', h = '') => `<div class="fld"><label>${l}</label>${t === 'textarea' ? `<textarea class="inp" name="${k}" rows="2">${esc(s[k])}</textarea>` : `<input class="inp" type="${t}" name="${k}" value="${esc(s[k])}">`}${h ? `<span class="hint">${h}</span>` : ''}</div>`;
+  const s = d.setting, pkt = (S.adm && S.adm.paket_soal) || [], inp = (k, l, t = 'text', h = '') => `<div class="fld"><label>${l}</label>${t === 'textarea' ? `<textarea class="inp" name="${k}" rows="2">${esc(s[k])}</textarea>` : `<input class="inp" type="${t}" name="${k}" value="${esc(s[k])}">`}${h ? `<span class="hint">${h}</span>` : ''}</div>`;
   const yn = (k, l) => `<label class="chk mb2"><input type="checkbox" name="${k}" ${ya(s[k]) ? 'checked' : ''}><span>${l}</span></label>`;
   return `<form data-form="simpanSetting" class="col gap4">
     <div class="grid g2" style="align-items:start"><div class="card"><h3 class="mb3">${ic('palette')} Identitas & Alamat</h3>${inp('NAMA_BRAND', 'Nama brand')}${inp('TAGLINE', 'Tagline')}${inp('LOGO_URL', 'URL logo (PNG transparan)', 'text', 'Kosongkan untuk memakai logo bawaan')}${inp('ALAMAT_WEB', 'Alamat web', 'text', 'mis. https://goukakupedia.github.io — dipakai di template WA')}${inp('VIDEO_PROFIL_YT', 'ID video profil YouTube')}${inp('TIKTOK', 'TikTok')}${inp('INSTAGRAM', 'Instagram')}${inp('STAT_SOAL_DIBAHAS', 'Angka "soal dibahas" di halaman depan', 'number')}</div>
@@ -1973,6 +2108,11 @@ R['a/pengaturan'] = () => {
         ${inp('GARIS_AMAN', 'Garis aman nilai (%)', 'number')}${inp('LIMIT_COBA_HARIAN', 'Batas Coba Gratis per nomor per hari', 'number')}${inp('LIMIT_LAPOR_HARIAN', 'Batas laporan soal per member per hari', 'number')}
         <h3 class="mb3 mt4">${ic('support_agent')} Kontak admin</h3>${inp('WA_ADMIN', 'No WA admin', 'text', 'Format 62…')}${inp('EMAIL_ADMIN', 'Email admin', 'email')}</div></div>
     <div class="card"><h3 class="mb3">${ic('sentiment_satisfied')} Pesan semangat per fase</h3><div class="grid g2" style="gap:0 14px">${inp('FASE_90', '> 90 hari', 'textarea')}${inp('FASE_30', '30–90 hari', 'textarea')}${inp('FASE_7', '7–30 hari', 'textarea')}${inp('FASE_1', '< 7 hari', 'textarea')}${inp('FASE_H', 'Hari H', 'textarea')}</div></div>
+    <div class="card"><h3 class="mb3">${ic('home')} Halaman depan & Simulasi Gratis</h3>
+      <div class="fld"><label>Gambar kotak 科目 (hero)</label><div class="row gap2"><input class="inp f1" name="GAMBAR_KOTAK_HERO" value="${esc(s.GAMBAR_KOTAK_HERO || '')}" placeholder="Unggah gambar"><label class="btn btn-light btn-sm">${ic('upload')} Unggah<input type="file" accept="image/*" hidden data-up="GAMBAR_KOTAK_HERO" data-folder="publik"></label></div><span class="hint">Disarankan 1200 × 850 px, JPG/PNG, maks. 2 MB</span></div>
+      <div class="fld"><label>Paket soal Simulasi Gratis</label>${pkt.length ? `<select class="inp" name="PAKET_COBA_ID"><option value="">— pilih paket —</option>${pkt.map(p => `<option value="${esc(p.id)}" ${String(p.id) === String(s.PAKET_COBA_ID) ? 'selected' : ''}>${esc(plainJP(p.nama))}</option>`).join('')}</select>` : `<input class="inp" name="PAKET_COBA_ID" value="${esc(s.PAKET_COBA_ID || '')}">`}<span class="hint">Paket khusus "Coba" berisi 125 soal (sesi 午前 dan 午後)</span></div>
+      <div class="fld"><label>File PDF simulasi (bisa diunduh gratis)</label><div class="row gap2"><input class="inp f1" name="PDF_COBA_URL" value="${esc(s.PDF_COBA_URL || '')}" placeholder="Unggah PDF"><label class="btn btn-light btn-sm">${ic('upload')} Unggah PDF<input type="file" accept="application/pdf" hidden data-up="PDF_COBA_URL" data-folder="publik"></label></div></div>
+    </div>
     <div class="card"><h3 class="mb3">${ic('notifications_active')} Notifikasi</h3><div class="row wrap gap4">${yn('NOTIF_WA', 'WhatsApp (Fonnte) aktif')}${yn('NOTIF_EMAIL', 'Email cadangan aktif')}${yn('NOTIF_SENIN', 'WA ringkasan target tiap Senin')}</div>
       <div class="grid g3" style="gap:0 14px">${inp('BLAST_JEDA_MIN', 'Jeda blast min (detik)', 'number')}${inp('BLAST_JEDA_MAKS', 'Jeda blast maks (detik)', 'number')}${inp('BLAST_BATAS_HARIAN', 'Batas kampanye per hari', 'number')}</div>
       <div class="tiny muted mb3">Kuota email tersisa hari ini: ${d.email_kuota === null ? '-' : d.email_kuota}. Variabel template: {nama} {paket} {angkatan} {tanggal_ujian} {link_login} {judul_kelas} {jam_kelas} {sisa_hari} {target_minggu_ini} {status_jadwal} {kode}</div>
