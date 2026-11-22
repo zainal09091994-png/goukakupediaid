@@ -1,9 +1,9 @@
-/* Service Worker Goukaku Pedia ID — build ce5e03b9
+/* Service Worker Goukaku Pedia ID — build b2bbc95e
  * - Aset aplikasi: stale-while-revalidate (buka instan, update di latar)
  * - API Apps Script: SELALU jaringan (tidak pernah di-cache)
  * - Font & pustaka CDN: cache-first */
-const VER = 'gp-ce5e03b9';
-const CORE = ['./', './index.html', './css/style.css?v=ce5e03b9', './js/config.js?v=ce5e03b9', './js/app.js?v=ce5e03b9', './manifest.json', './favicon.png', './logo.png', './icon-192.png', './icon-512.png'];
+const VER = 'gp-b2bbc95e';
+const CORE = ['./', './index.html', './css/style.css?v=b2bbc95e', './js/config.js?v=b2bbc95e', './js/app.js?v=b2bbc95e', './manifest.json', './favicon.png', './logo.png', './icon-192.png', './icon-512.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(VER).then(c => c.addAll(CORE)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== VER).map(k => caches.delete(k)))).then(() => self.clients.claim())); });
 self.addEventListener('fetch', e => {
