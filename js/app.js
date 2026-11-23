@@ -506,7 +506,7 @@ R.home = () => {
   <section class="psec tight"><div class="wrapx"><div class="band-coba"><div><h2>Coba simulasi ujian gratis</h2><p class="muted mt1">125 soal dalam 2 sesi bertimer (午前 105 menit, 午後 115 menit). Tanpa daftar akun, dan PDF simulasi bisa diunduh gratis.</p></div><button class="btn btn-red" data-go="coba">${ic('play_circle', 'fill')} Mulai Simulasi Gratis</button></div></div></section>
   <section class="psec"><div class="wrapx"><div class="psec-h"><h2>Isi Kelas</h2><p>Semua yang kamu butuhkan dari hari pertama sampai hari ujian.</p></div>
     <div class="grid g3">${fitur.map(f => `<div class="card feat"><div class="ic">${ic(f[0])}</div><div><h3>${furi(f[1])}</h3><p class="small muted mt1">${furi(f[2])}</p></div></div>`).join('')}</div></div></section>
-  <section class="psec" id="paket"><div class="wrapx"><div class="psec-h"><h2>Paket & Harga</h2><p>Masa aktif sampai hari ujian angkatanmu. Bayar aman lewat Lynk.id.</p></div>
+  <section class="psec" id="paket"><div class="wrapx"><div class="psec-h"><h2>Paket & Harga</h2><p>Masa aktif sampai hari ujian angkatanmu. Bayar aman lewat transfer bank, konfirmasi via WhatsApp.</p></div>
     <div class="grid g3">${P.paket.map(p => paketCard(p)).join('')}</div></div></section>
   <section class="psec" id="lulus" style="background:var(--c-surface)"><div class="wrapx"><div class="psec-h"><h2>Bukti Lulus 合格</h2><p>Mereka sudah membuktikannya. Giliranmu berikutnya!</p></div>
     <div class="hscroll">${P.bukti.map(x => `<div class="card" style="background:var(--c-bg)">${x.foto_url ? `<img src="${esc(x.foto_url)}" alt="Bukti lulus ${esc(x.nama_member)}" loading="lazy" style="border-radius:12px;aspect-ratio:4/3;object-fit:cover;width:100%">` : `<div style="aspect-ratio:4/3;border-radius:12px;background:var(--grad-hero);display:flex;align-items:center;justify-content:center">${stamp('lg')}</div>`}
@@ -679,16 +679,16 @@ R.daftar = p => {
   S.ui.title = 'Daftar';
   if (!S.pub) return '<div class="auth"><div class="sk" style="height:400px;width:100%;max-width:520px"></div></div>';
   if (S.daftarOk) { const d = S.daftarOk; return `<div class="auth"><div class="card center" style="max-width:520px">${stamp('lg')}<h2 class="mt4">Pendaftaran tersimpan!</h2>
-      <p class="mt2">Langkah terakhir: bayar paket <b>${esc(d.paket)}</b> lewat Lynk.id.</p>
+      <p class="mt2">Langkah terakhir: bayar paket <b>${esc(d.paket)}</b> lewat transfer bank.</p>
       <div class="card mt4" style="background:var(--c-pale);box-shadow:none;text-align:left"><b>⚠️ Penting:</b> saat membayar, pakai <b>email yang sama</b>: <span class="bold" style="color:var(--c-primary-2)">${esc(d.email)}</span>. Setelah bayar, akun aktif otomatis & kamu menerima WhatsApp.</div>
-      <a class="btn btn-red btn-block mt4" href="${esc(d.link_bayar)}" target="_blank" rel="noopener">${ic('payments')} Bayar di Lynk.id</a>
+      <a class="btn btn-red btn-block mt4" href="${esc(d.link_bayar)}" target="_blank" rel="noopener">${ic('chat')} Bayar lewat WhatsApp</a>
       <button class="btn btn-light btn-block mt2" data-go="masuk">Sudah bayar? Masuk</button></div></div>`; }
   const pk = S.pub.paket, sel = p.id || (pk[1] || pk[0] || {}).id;
-  return `<div class="auth"><div class="card" style="max-width:560px"><h2>Daftar Kelas</h2><p class="muted small mt1">Isi data diri, lalu bayar lewat Lynk.id.</p>
+  return `<div class="auth"><div class="card" style="max-width:560px"><h2>Daftar Kelas</h2><p class="muted small mt1">Isi data diri, lalu lanjutkan pembayaran lewat transfer bank.</p>
     <form data-form="daftar" class="mt4" novalidate><input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
       <div class="lbl mb2">Pilih paket</div><div class="col gap2 mb4">${pk.map(x => `<label class="card tap row" style="box-shadow:inset 0 0 0 2px ${x.id === sel ? 'var(--c-primary-2)' : 'var(--c-line)'};padding:12px"><input type="radio" name="paket_id" value="${esc(x.id)}" ${x.id === sel ? 'checked' : ''} data-act="pilihPaket" style="accent-color:var(--c-primary);width:20px;height:20px"><div class="f1"><b>${esc(x.nama)}</b><div class="tiny muted">${esc(x.deskripsi)}</div></div><b class="nowrap">${rp(x.promo ? x.promo.harga : x.harga)}</b></label>`).join('')}</div>
       <div class="fld"><label for="dNama">Nama lengkap</label><input id="dNama" class="inp" name="nama" required autocomplete="name"></div>
-      <div class="fld"><label for="dEm">Email</label><input id="dEm" class="inp" name="email" type="email" required autocomplete="email"><span class="hint">Pakai email ini juga saat membayar di Lynk.id.</span></div>
+      <div class="fld"><label for="dEm">Email</label><input id="dEm" class="inp" name="email" type="email" required autocomplete="email"><span class="hint">Pakai email ini juga saat mengonfirmasi pembayaran ke admin.</span></div>
       <div class="fld"><label for="dWa">Nomor WhatsApp</label><input id="dWa" class="inp" name="no_wa" required inputmode="tel" autocomplete="tel" placeholder="08xxxxxxxxxx"></div>
       <div class="fld"><label for="dPw">Buat sandi</label><input id="dPw" class="inp" name="sandi" type="password" required minlength="8" autocomplete="new-password" placeholder="Minimal 8 karakter"></div>
       <div class="fld"><label for="dSt">Tinggal di</label><select id="dSt" class="inp" name="status_tinggal"><option>di Indonesia</option><option>di Jepang</option></select></div>
@@ -1096,22 +1096,85 @@ ACT.bukaMateri = async el => {
   catch (e) { const b = $('#vBody'); if (b) b.innerHTML = `<div class="empty" style="color:#fff">${ic('error')}<p>${esc(e.message)}</p><button class="btn btn-white mt3" data-act="tutupViewer">Tutup</button></div>`; }
 };
 ACT.tutupViewer = () => { const v = $('#viewer'); if (v) v.remove(); };
+let pdfKini_ = null;
+const HL_WARNA = [['#fde047', 'Kuning'], ['#86efac', 'Hijau'], ['#f9a8d4', 'Merah muda'], ['#93c5fd', 'Biru']];
+function hlSiapkan_() {
+  if (document.getElementById('hlCss')) return;
+  const st = document.createElement('style'); st.id = 'hlCss';
+  st.textContent = '.pg{position:relative}' + '.textLayer{position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;opacity:.3;line-height:1}' +
+    '.textLayer>span{color:transparent;position:absolute;white-space:pre;cursor:text;transform-origin:0% 0%}' +
+    '.textLayer ::selection{background:rgba(59,130,246,.35)}' +
+    '.hl-r{position:absolute;mix-blend-mode:multiply;border-radius:2px;cursor:pointer}' +
+    '#hlBar{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:10001;display:none;gap:8px;align-items:center;background:#fff;border-radius:999px;padding:8px 12px;box-shadow:0 6px 24px rgba(0,0,0,.25)}' +
+    '#hlBar button{width:30px;height:30px;border-radius:50%;border:2px solid #0002;cursor:pointer}' +
+    '#hlBar .x{width:auto;height:auto;border:0;font-size:13px;padding:6px 8px;background:none;border-radius:8px}';
+  document.head.appendChild(st);
+  const bar = document.createElement('div'); bar.id = 'hlBar';
+  bar.innerHTML = HL_WARNA.map(([c, n]) => `<button type="button" data-c="${c}" aria-label="Stabilo ${n}" style="background:${c}"></button>`).join('') + '<button type="button" class="x" data-x="1">Batal</button>';
+  bar.addEventListener('pointerdown', e => e.preventDefault());
+  bar.addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; if (b.dataset.c) hlTerapkan_(b.dataset.c); else hlSembunyi_(); });
+  document.body.appendChild(bar);
+  document.addEventListener('selectionchange', hlCek_);
+}
+function hlSembunyi_() { const b = document.getElementById('hlBar'); if (b) b.style.display = 'none'; }
+function hlCek_() {
+  const b = document.getElementById('hlBar'), vb = document.getElementById('vBody'), s = window.getSelection();
+  if (!b) return;
+  if (!s || s.isCollapsed || !vb || !s.anchorNode || !vb.contains(s.anchorNode)) return hlSembunyi_();
+  b.style.display = 'flex';
+}
+function hlGambar_(pg, list) {
+  pg.querySelectorAll('.hl-r').forEach(e => e.remove());
+  (list || []).forEach(h => {
+    const d = document.createElement('div'); d.className = 'hl-r'; d.dataset.id = h.id;
+    d.style.cssText = `left:${h.x * 100}%;top:${h.y * 100}%;width:${h.w * 100}%;height:${h.h * 100}%;background:${h.c}`;
+    pg.appendChild(d);
+  });
+}
+function hlTerapkan_(warna) {
+  const s = window.getSelection(), vb = $('#vBody');
+  if (!s || s.isCollapsed || !vb || !pdfKini_) return hlSembunyi_();
+  const key = 'gp_hl_' + pdfKini_, store = LS.get(key, {}) || {}, pages = [...vb.querySelectorAll('.pg')];
+  [...s.getRangeAt(0).getClientRects()].filter(r => r.width > 1 && r.height > 1).forEach(r => {
+    const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+    const pg = pages.find(p => { const b = p.getBoundingClientRect(); return cy >= b.top && cy <= b.bottom && cx >= b.left && cx <= b.right; });
+    if (!pg) return;
+    const b = pg.getBoundingClientRect(), pn = pg.dataset.p;
+    store[pn] = store[pn] || [];
+    store[pn].push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), x: (r.left - b.left) / b.width, y: (r.top - b.top) / b.height, w: r.width / b.width, h: r.height / b.height, c: warna });
+  });
+  LS.set(key, store);
+  pages.forEach(pg => hlGambar_(pg, store[pg.dataset.p]));
+  s.removeAllRanges(); hlSembunyi_();
+}
+function hlHapus_(el) {
+  const pg = el.closest('.pg'), key = 'gp_hl_' + pdfKini_, store = LS.get(key, {}) || {};
+  store[pg.dataset.p] = (store[pg.dataset.p] || []).filter(h => h.id !== el.dataset.id);
+  LS.set(key, store); el.remove();
+}
 async function pdfView(m) {
+  hlSiapkan_(); pdfKini_ = m.id;
   const [lib, data] = await Promise.all([muatLib(PDFJS_URL, 'pdfjsLib'), FILES[m.id] ? Promise.resolve(FILES[m.id]) : API.call('m.materi.buka', { id: m.id }, { timeout: 120000, silent: true })]);
   FILES[m.id] = data;
   lib.GlobalWorkerOptions.workerSrc = PDFJS_WORKER;
   const pdf = await lib.getDocument({ data: b64ToBytes(data.b64) }).promise;
   const body = $('#vBody'); if (!body) return;
-  $('#vInfo').textContent = pdf.numPages + ' halaman · hanya baca online';
+  body.onclick = e => { const el = e.target.closest('.hl-r'); if (el) hlHapus_(el); };
+  $('#vInfo').textContent = pdf.numPages + ' halaman · blok teks untuk stabilo';
   body.innerHTML = `<div class="viewer-pages">${Array.from({ length: pdf.numPages }, (_, i) => `<div class="pg" data-p="${i + 1}"><div class="sk" style="width:min(820px,100%);aspect-ratio:.707;opacity:.15"></div></div>`).join('')}</div>`;
   const w = Math.min(body.clientWidth - 16, 900), dpr = Math.min(2, window.devicePixelRatio || 1);
   const io = new IntersectionObserver(async ents => {
     for (const en of ents) {
       if (!en.isIntersecting || en.target.dataset.done) continue; en.target.dataset.done = 1; io.unobserve(en.target);
-      const page = await pdf.getPage(num(en.target.dataset.p)), vp0 = page.getViewport({ scale: 1 }), sc = w / vp0.width, vp = page.getViewport({ scale: sc * dpr });
-      const cv = document.createElement('canvas'); cv.width = vp.width; cv.height = vp.height; cv.style.width = (vp.width / dpr) + 'px';
+      const pg = en.target, page = await pdf.getPage(num(pg.dataset.p)), vp0 = page.getViewport({ scale: 1 }), sc = w / vp0.width, vp = page.getViewport({ scale: sc * dpr });
+      const cv = document.createElement('canvas'); cv.width = vp.width; cv.height = vp.height; cv.style.width = (vp.width / dpr) + 'px'; cv.style.height = (vp.height / dpr) + 'px';
       await page.render({ canvasContext: cv.getContext('2d'), viewport: vp }).promise;
-      en.target.innerHTML = ''; en.target.appendChild(cv); en.target.insertAdjacentHTML('beforeend', wm());
+      const tl = document.createElement('div'); tl.className = 'textLayer';
+      pg.innerHTML = ''; pg.style.width = cv.style.width; pg.style.height = cv.style.height; pg.style.margin = '0 auto';
+      pg.appendChild(cv); pg.appendChild(tl);
+      lib.renderTextLayer({ textContent: await page.getTextContent(), container: tl, viewport: page.getViewport({ scale: sc }), textDivs: [] }).promise.catch(() => { });
+      pg.insertAdjacentHTML('beforeend', wm());
+      hlGambar_(pg, (LS.get('gp_hl_' + m.id, {}) || {})[pg.dataset.p]);
     }
   }, { root: body, rootMargin: '600px 0px' });
   $$('.pg', body).forEach(p => io.observe(p));
@@ -1273,12 +1336,16 @@ function soalHTML(q, o = {}) {
 function trikHTML(q) {
   const t = q.trik || {}, ks = parseKosa(q.kosakata);
   if (!t.kata_kunci && !t.rumus_cepat && !t.jembatan && !t.jebakan) return '';
-  const part = (cls, lbl, ico, txt, id) => txt ? `<div class="part"><span class="lb ${cls}">${ic(ico)} ${lbl}</span><p>${md(txt)}</p>${id ? `<p class="terj trik-id">${md(id)}</p>` : ''}</div>` : '';
-  return `<section class="trik ${tgCls('soal')}" aria-label="TRIK JITU"><div class="glow"></div>${stamp('sm')}
-    <div class="row" style="position:relative">${ic('lightbulb', 'fill')}<div><h3>TRIK JITU GOUKAKU <span class="trik-jp">合格への近道</span></h3><div class="tiny" style="color:var(--c-tfix)">Bongkar pola ujian Kaigo Fukushishi</div></div></div>
-    <div class="mt2" style="position:relative">${togBar('soal')}</div>
-    ${part('k', 'KATA KUNCI · キーワード', 'key', t.kata_kunci, t.kata_kunci_id)}${part('r', 'RUMUS CEPAT · 答えを出す近道', 'bolt', t.rumus_cepat, t.rumus_cepat_id)}${part('j', 'JEMBATAN INGATAN · 覚え方', 'psychology', t.jembatan, t.jembatan_id)}${part('a', 'AWAS JEBAKAN · 注意', 'warning', t.jebakan, t.jebakan_id)}
-    ${ks.length ? `<div class="mt3" style="position:relative"><div class="tiny bold" style="color:var(--c-tfix);letter-spacing:.06em">KOSAKATA PENTING</div>${ks.map(k => `<span class="vchip"><b>${furi(k.jp)}</b>${k.arti ? ' <span class="terj">' + esc(k.arti) + '</span>' : ''}</span>`).join('')}</div>` : ''}</section>`;
+  const part = (cls, chip, sub, txt, id) => txt ? `<div class="tk-part">
+      <div class="tk-row"><span class="tk-chip tk-${cls}">${chip}</span><span class="tk-sub">${furi(sub)}</span></div>
+      <div class="tk-jp">${md(txt)}</div>${id ? `<div class="tk-id trik-id">${md(id)}</div>` : ''}</div>` : '';
+  const kosa = ks.length ? `<div class="tk-kosa mt3"><div class="tiny bold" style="letter-spacing:.06em">KOSAKATA PENTING</div>${ks.map(k => `<span class="vchip"><b>${furi(k.jp)}</b>${k.arti ? ' <span class="terj">' + esc(k.arti) + '</span>' : ''}</span>`).join('')}</div>` : '';
+  return `<section class="trik tk-box ${tgCls('soal')}" aria-label="TRIK JITU">
+    <div class="tk-head"><span class="tk-bolt">⚡</span><b>TRIK JITU</b><span class="tk-brand">GOUKAKU PEDIA ID</span><span class="tk-bar">｜</span><span class="tk-jphead">${furi('｜合格《ごうかく》への｜近道《ちかみち》')}</span></div>
+    <div class="tk-toggle">${togBar('soal')}</div>
+    <div class="tk-body">${part('k', '★ KATA KUNCI', '｜キーワード', t.kata_kunci, t.kata_kunci_id)}${part('r', '❶ RUMUS CEPAT', '｜答《こた》えを｜出《だ》す｜近道《ちかみち》', t.rumus_cepat, t.rumus_cepat_id)}${part('j', '◆ JEMBATAN INGATAN', '｜覚《おぼ》え｜方《かた》', t.jembatan, t.jembatan_id)}${part('a', '! AWAS JEBAKAN', '｜注意《ちゅうい》', t.jebakan, t.jebakan_id)}</div>
+    <div class="tk-foot"><span>#GoukakuPediaID</span>｜Teman Belajar Kamu｜<span class="tk-red">${furi('｜合格《ごうかく》まで｜一緒《いっしょ》に！')}</span></div>
+  </section>${kosa}`;
 }
 ACT.terjemah = () => {
   if (S.route === 'coba') { S.coba.terjemah = !S.coba.terjemah; render(false); return; }
