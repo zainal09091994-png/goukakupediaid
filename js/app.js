@@ -1313,7 +1313,7 @@ function parseKosa(s) {
     return { jp: m ? '｜' + m[1] + '《' + m[2] + '》' : w, arti: arti || '' };
   });
 }
-function soalHTML(q, o = {}) {
+function kunciBenar(pilih, kunci) { if (pilih === undefined || pilih === null || pilih === '') return false; return String(kunci || '').split(',').map(s => s.trim()).includes(String(pilih).trim()); } function soalHTML(q, o = {}) {
   const kunci = String(q.kunci || ''), tampil = !!o.tampilKunci, pilih = o.pilih === undefined ? '' : String(o.pilih);
   const an = tampil ? parseAnalisa(q.analisa) : [];
   return `<article class="q-card col gap3" aria-label="Soal ${o.nomor || q.nomor || ''}">
@@ -1325,7 +1325,7 @@ function soalHTML(q, o = {}) {
     ${o.terjemah ? `<div class="trans"><div class="tiny bold" style="color:var(--c-primary-2);text-transform:uppercase;letter-spacing:.05em">Arti bahasa Indonesia</div>${esc(q.soal_id)}</div>` : ''}
     <div class="tiny bold muted" style="letter-spacing:.06em">PILIHAN JAWABAN (${q.pilihan.length} OPSI)</div>
     <div class="opts" role="radiogroup">${q.pilihan.map((p, i) => {
-      const n = String(i + 1), ok = tampil && n === kunci, bad = tampil && pilih === n && n !== kunci, sel = !tampil && pilih === n;
+      const n = String(i + 1), ok = tampil && kunciBenar(n, kunci), bad = tampil && pilih === n && !kunciBenar(n, kunci), sel = !tampil && pilih === n;
       return `<button class="opt ${ok ? 'ok' : bad ? 'bad' : sel ? 'sel' : ''}" role="radio" aria-checked="${pilih === n}" data-act="jawab" data-v="${n}" ${tampil ? 'disabled' : ''}>
         <span class="n">${ok ? '✓' : bad ? '✕' : n}</span><span class="f1">${ok || bad ? `<span class="tiny bold" style="color:${ok ? 'var(--c-ok)' : 'var(--c-bad)'}">${ok ? 'KUNCI JAWABAN BENAR (正解)' : 'JAWABAN KAMU (KURANG TEPAT)'}</span>` : ''}
         <span class="jp">${furi(p.jp)}</span>${(o.terjemah || tampil) && p.id ? `<span class="id">${esc(p.id)}</span>` : ''}</span></button>`;
@@ -1466,7 +1466,7 @@ R['m/kuis'] = () => {
   const sudah = review || (!ujian && Q.cek[q.id]);
   const terj = tgGet('soal').terj;
   const dijawab = Object.keys(Q.jawab).length;
-  const nav = `<div class="qnav">${Q.soal.map((s, i) => { const j = Q.jawab[s.id]; let c = ''; if (review || (!ujian && Q.cek[s.id])) c = j === undefined ? '' : String(j) === String(s.kunci) ? 'ok' : 'bad'; else if (j !== undefined) c = 'ans'; return `<button class="${c} ${i === Q.idx ? 'cur' : ''} ${Q.ragu[s.id] ? 'ragu' : ''}" data-act="keSoal" data-i="${i}" aria-label="Soal ${i + 1}">${i + 1}</button>`; }).join('')}</div>`;
+  const nav = `<div class="qnav">${Q.soal.map((s, i) => { const j = Q.jawab[s.id]; let c = ''; if (review || (!ujian && Q.cek[s.id])) c = j === undefined ? '' : kunciBenar(j, s.kunci) ? 'ok' : 'bad'; else if (j !== undefined) c = 'ans'; return `<button class="${c} ${i === Q.idx ? 'cur' : ''} ${Q.ragu[s.id] ? 'ragu' : ''}" data-act="keSoal" data-i="${i}" aria-label="Soal ${i + 1}">${i + 1}</button>`; }).join('')}</div>`;
   const top = `<div class="q-top"><div class="card row-b wrap" style="padding:10px 14px"><div class="row wrap gap2"><span class="chip jp">${esc(Q.jenis)}</span><b class="small">Soal ${Q.idx + 1} dari ${n}</b>${ujian ? `<span class="tiny muted">${dijawab} dijawab</span>` : ''}</div>
     <div class="row gap2">${ujian ? `<button class="btn btn-light btn-sm" data-act="ragu">${ic('flag', Q.ragu[q.id] ? 'fill' : '')} <span style="color:${Q.ragu[q.id] ? 'var(--c-amber)' : 'inherit'}">Ragu-ragu</span></button><span class="timer" id="qTimer" aria-live="off">${ic('timer')}<span>--:--</span></span>` : review ? '<span class="chip pale">Mode pembahasan</span>' : `<span class="chip ok">${ic('bolt')} Pembahasan langsung</span>`}</div></div></div>`;
   const side = `<div class="col gap3">${sudah ? trikHTML(q) || '<div class="card small muted">TRIK JITU untuk soal ini belum tersedia.</div>' : ''}
